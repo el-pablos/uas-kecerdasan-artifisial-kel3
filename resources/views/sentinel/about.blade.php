@@ -61,7 +61,7 @@
 @endsection
 
 @section('content')
-    <x-breadcrumb title="Tentang Sistem" pagetitle="Log Sentinel" />
+    <x-breadcrumb title="Tentang Sistem" li_1="Log Sentinel" />
 
     <!-- Hero Section -->
     <div class="row mb-4">

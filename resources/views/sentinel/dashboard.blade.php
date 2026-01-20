@@ -63,7 +63,7 @@
 @endsection
 
 @section('content')
-    <x-breadcrumb title="Dashboard" pagetitle="Log Sentinel" />
+    <x-breadcrumb title="Dashboard" li_1="Log Sentinel" />
 
     <!-- Header dengan Tombol Simulasi -->
     <div class="row mb-4">

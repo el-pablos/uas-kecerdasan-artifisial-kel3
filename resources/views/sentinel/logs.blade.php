@@ -29,7 +29,7 @@
 @endsection
 
 @section('content')
-    <x-breadcrumb title="Daftar Log" pagetitle="Log Sentinel" />
+    <x-breadcrumb title="Daftar Log" li_1="Log Sentinel" />
 
     <div class="row">
         <div class="col-12">

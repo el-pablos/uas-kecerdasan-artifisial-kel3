@@ -3,19 +3,24 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
-     * A basic test example.
+     * Test bahwa root URL redirect ke dashboard.
      *
      * @return void
      */
     public function test_example()
     {
-        $response = $this->get('/');
+        $user = User::factory()->create();
+        
+        $response = $this->actingAs($user)->get('/');
 
-        $response->assertStatus(200);
+        $response->assertRedirect('/dashboard');
     }
 }
