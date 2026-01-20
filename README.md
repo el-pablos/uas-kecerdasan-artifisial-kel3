@@ -1,66 +1,324 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛡️ Log Sentinel - Anomaly Detection System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<div align="center">
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3+-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Sistem Deteksi Anomali Log Server Berbasis Machine Learning**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+*Proyek Ujian Akhir Semester - Mata Kuliah Kecerdasan Artifisial*
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+</div>
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📋 Tim Penyusun
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| No | Nama Lengkap | NPM |
+|----|--------------|-----|
+| 1 | Jeremy Christo Emmanuelle Panjaitan | 237006516084 |
+| 2 | Muhammad Akbar Hadi Pratama | 237006516058 |
+| 3 | Farrel Alfaridzi | 237006516028 |
+| 4 | Chosmas Laurens Rumngewur | 217006516074 |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 📖 Deskripsi Sistem
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Log Sentinel** adalah sistem deteksi anomali berbasis kecerdasan buatan yang dirancang untuk menganalisis log server secara real-time dan mengidentifikasi aktivitas mencurigakan yang berpotensi menjadi ancaman keamanan siber.
 
-### Premium Partners
+### Arsitektur Sistem
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Sistem ini menggunakan arsitektur **microservice** yang terdiri dari dua komponen utama:
 
-## Contributing
+1. **Backend Laravel 11** - Menangani manajemen data, autentikasi pengguna, dan antarmuka dashboard monitoring.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Python Flask ML Service** - Menyediakan layanan prediksi menggunakan algoritma **Isolation Forest** untuk mendeteksi pola anomali pada log server.
 
-## Code of Conduct
+### Algoritma Isolation Forest
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Isolation Forest adalah algoritma unsupervised learning yang efektif untuk deteksi anomali. Algoritma ini bekerja dengan prinsip bahwa:
 
-## Security Vulnerabilities
+- **Anomali** adalah data yang "berbeda" dan lebih mudah diisolasi
+- **Data normal** membutuhkan lebih banyak partisi untuk diisolasi
+- Menggunakan ensemble dari decision trees yang dibangun secara random
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Parameter yang dianalisis:**
+- Response time (waktu respons server)
+- Status code (kode HTTP)
+- Request frequency (frekuensi permintaan)
+- IP address patterns (pola alamat IP)
 
-## License
+### Jenis Ancaman yang Terdeteksi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Jenis Serangan | Indikator |
+|----------------|-----------|
+| DDoS Attack | Response time tinggi, status 503, traffic flood |
+| Brute Force | Multiple failed login attempts, status 401 |
+| SQL Injection | Suspicious query patterns, status 400 |
+| Port Scanning | Sequential 404 errors, enumeration patterns |
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend & Frontend
+- **Framework:** Laravel 11.x (PHP 8.2+)
+- **Template:** Velzon Admin Dashboard
+- **CSS Framework:** Bootstrap 5.x
+- **Charts:** ApexCharts.js
+- **Icons:** Remix Icon
+
+### Machine Learning Service
+- **Language:** Python 3.10+
+- **Framework:** Flask 3.x
+- **ML Library:** Scikit-Learn 1.3+
+- **Data Processing:** NumPy, Pandas
+
+### Database
+- **Production:** MySQL 8.0+
+- **Testing:** SQLite (in-memory)
+
+---
+
+## 🚀 Cara Instalasi & Menjalankan
+
+### Prasyarat
+
+Pastikan sistem Anda telah terinstal:
+- PHP 8.2 atau lebih tinggi
+- Composer 2.x
+- Node.js 18.x & NPM
+- Python 3.10 atau lebih tinggi
+- MySQL 8.0 atau lebih tinggi
+- Git
+
+### Langkah 1: Clone Repository
+
+```bash
+git clone https://github.com/[username]/uas-kecerdasan-artifisial-kel3.git
+cd uas-kecerdasan-artifisial-kel3
+```
+
+### Langkah 2: Setup Python ML Service
+
+```bash
+# Masuk ke direktori ml_service
+cd ml_service
+
+# Buat virtual environment
+python -m venv venv
+
+# Aktifkan virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Kembali ke root directory
+cd ..
+```
+
+### Langkah 3: Setup Laravel Backend
+
+```bash
+# Install PHP dependencies
+composer install
+
+# Install Node.js dependencies
+npm install
+
+# Build assets
+npm run build
+
+# Copy file environment
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+```
+
+### Langkah 4: Konfigurasi Database
+
+Edit file `.env` dan sesuaikan konfigurasi database:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=log_sentinel_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Buat database di MySQL:
+
+```sql
+CREATE DATABASE log_sentinel_db;
+```
+
+### Langkah 5: Migrasi & Seeding Database
+
+```bash
+# Jalankan migrasi dan seeding
+php artisan migrate --seed
+```
+
+Seeder akan membuat:
+- 1 user admin untuk demo
+- 20 dummy server logs (8 normal, 12 anomaly)
+
+### Langkah 6: Menjalankan Aplikasi
+
+**Terminal 1 - Jalankan Python ML Service:**
+
+```bash
+cd ml_service
+venv\Scripts\activate  # Windows
+# atau: source venv/bin/activate  # Linux/Mac
+
+python app.py
+```
+
+ML Service akan berjalan di: `http://127.0.0.1:5000`
+
+**Terminal 2 - Jalankan Laravel Server:**
+
+```bash
+php artisan serve
+```
+
+Laravel akan berjalan di: `http://127.0.0.1:8000`
+
+### Langkah 7: Akses Dashboard
+
+Buka browser dan akses: **http://127.0.0.1:8000**
+
+---
+
+## 🔐 Akun Demo
+
+Gunakan kredensial berikut untuk login:
+
+| Field | Value |
+|-------|-------|
+| **Email** | `admin@logsentinel.com` |
+| **Password** | `password` |
+
+---
+
+## 📁 Struktur Direktori
+
+```
+uas-kecerdasan-artifisial-kel3/
+├── app/
+│   ├── Http/Controllers/
+│   │   └── SentinelController.php    # Controller utama
+│   └── Models/
+│       └── ServerLog.php             # Model log server
+├── database/
+│   ├── factories/
+│   │   └── ServerLogFactory.php      # Factory untuk testing
+│   ├── migrations/
+│   │   └── *_create_server_logs_table.php
+│   └── seeders/
+│       └── DatabaseSeeder.php        # Seeder data demo
+├── ml_service/                       # Python ML Microservice
+│   ├── app.py                        # Flask application
+│   ├── venv/                         # Python virtual environment
+│   └── requirements.txt              # Python dependencies
+├── resources/views/
+│   └── sentinel/
+│       ├── dashboard.blade.php       # Halaman dashboard
+│       ├── logs.blade.php            # Halaman daftar log
+│       └── about.blade.php           # Halaman tentang tim
+├── routes/
+│   ├── web.php                       # Web routes
+│   └── api.php                       # API routes
+├── tests/
+│   ├── Feature/
+│   │   ├── ApiEndpointsTest.php      # Test API
+│   │   └── DashboardTest.php         # Test Dashboard
+│   └── Unit/
+│       └── ServerLogModelTest.php    # Test Model
+└── README.md
+```
+
+---
+
+## 🧪 Menjalankan Unit Test
+
+```bash
+# Jalankan semua test
+php artisan test
+
+# Jalankan dengan detail output
+php artisan test --verbose
+
+# Jalankan test spesifik
+php artisan test --filter=ServerLogModelTest
+```
+
+**Hasil Test:**
+- ✅ 27 tests passed
+- ✅ 116 assertions
+- ✅ 0 failures
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/analyze` | Analisis log baru dengan ML |
+| GET | `/api/recent-logs` | Ambil log terbaru |
+| GET | `/api/stats` | Statistik dashboard |
+| GET | `/api/chart-data` | Data untuk chart |
+| POST | `/api/simulate-attack` | Simulasi serangan untuk demo |
+
+### Contoh Request API Analyze
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip_address": "192.168.1.100",
+    "method": "GET",
+    "url": "/api/users",
+    "status_code": 200,
+    "user_agent": "Mozilla/5.0",
+    "response_time": 150.5
+  }'
+```
+
+---
+
+## 📊 Fitur Utama
+
+1. **Dashboard Real-time** - Monitoring statistik log server dengan visualisasi chart
+2. **Deteksi Anomali ML** - Analisis otomatis menggunakan Isolation Forest
+3. **Simulasi Serangan** - Fitur demo untuk menunjukkan kemampuan deteksi
+4. **Filter & Search** - Pencarian dan filter log berdasarkan status
+5. **Responsive Design** - Tampilan optimal di desktop dan mobile
+
+---
+
+## 📜 Lisensi
+
+Proyek ini dibuat untuk keperluan akademis pada mata kuliah Kecerdasan Artifisial.
+
+---
+
+<div align="center">
+
+**© 2026 - Log Sentinel Team**
+
+*Universitas Negeri Jakarta*
+
+</div>
