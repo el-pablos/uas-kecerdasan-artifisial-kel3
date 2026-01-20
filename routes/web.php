@@ -22,7 +22,7 @@ Auth::routes();
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
 
 // ========================================
-// LOG SENTINEL ROUTES
+// LOG SENTINEL ROUTES (PROTECTED BY AUTH)
 // ========================================
 
 // Redirect root ke dashboard sentinel
@@ -30,17 +30,20 @@ Route::get('/', function () {
     return redirect()->route('sentinel.dashboard');
 });
 
-// Dashboard Utama
-Route::get('/dashboard', [LogAnalysisController::class, 'dashboard'])
-    ->name('sentinel.dashboard');
+// Semua route Log Sentinel WAJIB login
+Route::middleware(['auth'])->group(function () {
+    // Dashboard Utama
+    Route::get('/dashboard', [LogAnalysisController::class, 'dashboard'])
+        ->name('sentinel.dashboard');
 
-// Halaman Daftar Log
-Route::get('/logs', [LogAnalysisController::class, 'logList'])
-    ->name('sentinel.logs');
+    // Halaman Daftar Log
+    Route::get('/logs', [LogAnalysisController::class, 'logList'])
+        ->name('sentinel.logs');
 
-// Halaman About
-Route::get('/about', [LogAnalysisController::class, 'about'])
-    ->name('sentinel.about');
+    // Halaman About
+    Route::get('/about', [LogAnalysisController::class, 'about'])
+        ->name('sentinel.about');
+});
 
 // ========================================
 // API ENDPOINTS UNTUK AJAX
