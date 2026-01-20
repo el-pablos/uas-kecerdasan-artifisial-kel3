@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title') | Velzon - Admin & Dashboard Template</title>
+    <title>@yield('title') | Log Sentinel - Anomaly Detection System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
+    <meta content="Sistem Deteksi Anomali berbasis Machine Learning untuk analisis log server" name="description" />
+    <meta content="Log Sentinel Team" name="author" />
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico')}}">
     @include('layouts.head-css')
@@ -18,7 +18,7 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
         @include('layouts.topbar')
-        @include('layouts.sidebar')
+        @include('layouts.sidebar-sentinel')
         <!-- ============================================================== -->
         <!-- Start right Content here -->
         <!-- ============================================================== -->
