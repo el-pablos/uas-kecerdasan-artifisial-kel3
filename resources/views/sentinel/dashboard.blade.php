@@ -135,6 +135,44 @@
             margin: 10px 15px;
             font-size: 12px;
         }
+        /* Attack Line Animation */
+        @keyframes attack-line-dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes attack-line-glow {
+            0%, 100% {
+                opacity: 0.8;
+                filter: drop-shadow(0 0 3px currentColor);
+            }
+            50% {
+                opacity: 1;
+                filter: drop-shadow(0 0 8px currentColor);
+            }
+        }
+        .attack-line {
+            stroke-dasharray: 10, 5;
+            animation: attack-line-dash 1s linear forwards, attack-line-glow 0.5s ease-in-out infinite;
+        }
+        /* Server marker pulse */
+        @keyframes server-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(0, 255, 136, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+            }
+        }
+        .server-marker {
+            animation: server-pulse 2s infinite;
+        }
     </style>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -457,22 +495,25 @@
                 </div>
                 <div class="card-body">
                     <div id="cyber-map" style="height: 400px; border-radius: 8px; border: 2px solid rgba(239, 68, 68, 0.3);"></div>
-                    <div class="mt-3 d-flex justify-content-between align-items-center">
-                        <div class="d-flex gap-3">
+                    <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2" style="width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 10px #00ff88;"></span>
+                                <span class="small text-muted">Server Kita (Jakarta)</span>
+                            </div>
                             <div class="d-flex align-items-center">
                                 <span class="pulse-dot me-2"></span>
-                                <span class="small text-muted">Active Attack Point</span>
+                                <span class="small text-muted">Attack Origin</span>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-warning me-2" style="width: 12px; height: 12px; border-radius: 50%;"></span>
-                                <span class="small text-muted">DDoS Attack</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-danger me-2" style="width: 12px; height: 12px; border-radius: 50%;"></span>
-                                <span class="small text-muted">Intrusion Attempt</span>
+                                <span style="width: 20px; height: 3px; background: linear-gradient(90deg, #ff4757, #ffa502); display: inline-block; border-radius: 2px;" class="me-2"></span>
+                                <span class="small text-muted">Attack Path</span>
                             </div>
                         </div>
-                        <span class="small text-muted" id="attack-count">Attacks detected: <span class="fw-bold text-danger">0</span></span>
+                        <div class="d-flex gap-3">
+                            <span class="small text-muted">Attacks: <span class="fw-bold text-danger" id="attack-count-num">0</span></span>
+                            <span class="small text-muted">Blocked: <span class="fw-bold text-success" id="blocked-count-num">0</span></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -821,7 +862,7 @@
         const cyberMap = L.map('cyber-map', {
             zoomControl: true,
             attributionControl: false
-        }).setView([20, 0], 2);
+        }).setView([10, 50], 2);
 
         // Dark themed map tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -829,78 +870,193 @@
             subdomains: 'abcd'
         }).addTo(cyberMap);
 
-        // Attack simulation data
+        // Server location (Our server in Jakarta)
+        const serverLocation = { 
+            name: 'Log Sentinel Server', 
+            lat: -6.2088, 
+            lng: 106.8456,
+            ip: '103.28.xxx.xxx'
+        };
+
+        // Add server marker with pulsing effect
+        const serverIcon = L.divIcon({
+            className: 'server-marker-container',
+            html: `<div style="
+                width: 20px; 
+                height: 20px; 
+                background: radial-gradient(circle, #00ff88 0%, #00cc6a 100%);
+                border-radius: 50%;
+                border: 3px solid #fff;
+                box-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+                animation: server-pulse 2s infinite;
+            "></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        const serverMarker = L.marker([serverLocation.lat, serverLocation.lng], { icon: serverIcon })
+            .addTo(cyberMap)
+            .bindPopup(`
+                <div style="text-align: center; min-width: 180px;">
+                    <div style="font-size: 28px;">🛡️</div>
+                    <strong style="color: #00ff88; font-size: 14px;">${serverLocation.name}</strong><br>
+                    <small style="color: #aaa;">Jakarta, Indonesia</small><br>
+                    <code style="color: #00ff88; font-size: 11px;">${serverLocation.ip}</code><br>
+                    <span class="badge bg-success mt-2" style="font-size: 10px;">PROTECTED</span>
+                </div>
+            `);
+
+        // Attack simulation data with IPs
         const attackTypes = [
-            { name: 'DDoS Attack', color: '#f59e0b', icon: '🔥' },
-            { name: 'SQL Injection', color: '#ef4444', icon: '💉' },
-            { name: 'Brute Force', color: '#f97316', icon: '🔨' },
-            { name: 'Malware Upload', color: '#dc2626', icon: '🦠' },
-            { name: 'XSS Attack', color: '#ea580c', icon: '⚡' },
-            { name: 'Port Scan', color: '#fbbf24', icon: '🔍' }
+            { name: 'DDoS Attack', color: '#ff4757', icon: '🔥', severity: 'critical' },
+            { name: 'SQL Injection', color: '#ff6b81', icon: '💉', severity: 'high' },
+            { name: 'Brute Force', color: '#ffa502', icon: '🔨', severity: 'medium' },
+            { name: 'Malware Upload', color: '#ff4757', icon: '🦠', severity: 'critical' },
+            { name: 'XSS Attack', color: '#ff7f50', icon: '⚡', severity: 'high' },
+            { name: 'Port Scan', color: '#ffc107', icon: '🔍', severity: 'low' },
+            { name: 'SSH Bruteforce', color: '#ff6348', icon: '🔓', severity: 'high' },
+            { name: 'API Abuse', color: '#ff9f43', icon: '🌐', severity: 'medium' }
         ];
 
-        const targetCities = [
-            { name: 'Jakarta', lat: -6.2088, lng: 106.8456 },
-            { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
-            { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
-            { name: 'New York', lat: 40.7128, lng: -74.0060 },
-            { name: 'London', lat: 51.5074, lng: -0.1278 },
-            { name: 'Sydney', lat: -33.8688, lng: 151.2093 },
-            { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-            { name: 'São Paulo', lat: -23.5505, lng: -46.6333 },
-            { name: 'Moscow', lat: 55.7558, lng: 37.6173 },
-            { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
-            { name: 'Seoul', lat: 37.5665, lng: 126.9780 },
-            { name: 'Frankfurt', lat: 50.1109, lng: 8.6821 }
+        // Attacker sources with realistic data
+        const attackerSources = [
+            { country: 'China', city: 'Beijing', lat: 39.9042, lng: 116.4074, ipRange: '223.5.' },
+            { country: 'Russia', city: 'Moscow', lat: 55.7558, lng: 37.6173, ipRange: '185.220.' },
+            { country: 'USA', city: 'New York', lat: 40.7128, lng: -74.0060, ipRange: '104.28.' },
+            { country: 'Brazil', city: 'São Paulo', lat: -23.5505, lng: -46.6333, ipRange: '179.191.' },
+            { country: 'India', city: 'Mumbai', lat: 19.0760, lng: 72.8777, ipRange: '157.48.' },
+            { country: 'Germany', city: 'Frankfurt', lat: 50.1109, lng: 8.6821, ipRange: '185.156.' },
+            { country: 'Nigeria', city: 'Lagos', lat: 6.5244, lng: 3.3792, ipRange: '41.203.' },
+            { country: 'Iran', city: 'Tehran', lat: 35.6892, lng: 51.3890, ipRange: '5.160.' },
+            { country: 'North Korea', city: 'Pyongyang', lat: 39.0392, lng: 125.7625, ipRange: '175.45.' },
+            { country: 'Vietnam', city: 'Hanoi', lat: 21.0278, lng: 105.8342, ipRange: '113.185.' },
+            { country: 'Ukraine', city: 'Kyiv', lat: 50.4501, lng: 30.5234, ipRange: '91.219.' },
+            { country: 'Indonesia', city: 'Surabaya', lat: -7.2575, lng: 112.7521, ipRange: '182.253.' },
+            { country: 'Singapore', city: 'Singapore', lat: 1.3521, lng: 103.8198, ipRange: '103.6.' },
+            { country: 'Netherlands', city: 'Amsterdam', lat: 52.3676, lng: 4.9041, ipRange: '185.232.' },
+            { country: 'UK', city: 'London', lat: 51.5074, lng: -0.1278, ipRange: '185.25.' }
         ];
+
+        // Generate random IP
+        function generateIP(ipRange) {
+            return ipRange + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
+        }
 
         let attackCount = 0;
+        let blockedCount = 0;
+
+        // Create curved line between two points
+        function createCurvedLine(start, end, color) {
+            const latlngs = [];
+            const offsetX = (end.lng - start.lng) / 2;
+            const offsetY = (end.lat - start.lat) / 2;
+            
+            // Calculate curve control point
+            const midLat = start.lat + offsetY;
+            const midLng = start.lng + offsetX;
+            const curveFactor = Math.min(Math.abs(end.lng - start.lng), Math.abs(end.lat - start.lat)) * 0.3;
+            
+            // Generate curved path points
+            for (let i = 0; i <= 50; i++) {
+                const t = i / 50;
+                const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * (midLat + curveFactor) + t * t * end.lat;
+                const lng = (1 - t) * (1 - t) * start.lng + 2 * (1 - t) * t * midLng + t * t * end.lng;
+                latlngs.push([lat, lng]);
+            }
+            
+            return L.polyline(latlngs, {
+                color: color,
+                weight: 2,
+                opacity: 0.8,
+                dashArray: '10, 5',
+                className: 'attack-line'
+            });
+        }
 
         function simulateAttack() {
-            // Random city and attack type
-            const city = targetCities[Math.floor(Math.random() * targetCities.length)];
+            // Random attacker and attack type
+            const source = attackerSources[Math.floor(Math.random() * attackerSources.length)];
             const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+            const attackerIP = generateIP(source.ipRange);
             
             // Add some randomness to coordinates
-            const lat = city.lat + (Math.random() - 0.5) * 2;
-            const lng = city.lng + (Math.random() - 0.5) * 2;
+            const lat = source.lat + (Math.random() - 0.5) * 3;
+            const lng = source.lng + (Math.random() - 0.5) * 3;
 
-            // Create pulsing marker
-            const marker = L.circleMarker([lat, lng], {
-                radius: 8,
+            // Create attack line from source to server
+            const attackLine = createCurvedLine(
+                { lat: lat, lng: lng },
+                { lat: serverLocation.lat, lng: serverLocation.lng },
+                attack.color
+            ).addTo(cyberMap);
+
+            // Create source marker
+            const sourceMarker = L.circleMarker([lat, lng], {
+                radius: 6,
                 fillColor: attack.color,
-                color: attack.color,
+                color: '#fff',
                 weight: 2,
                 opacity: 1,
-                fillOpacity: 0.8,
+                fillOpacity: 0.9,
                 className: 'attack-marker'
             }).addTo(cyberMap);
 
-            // Add popup
-            marker.bindPopup(`
-                <div style="text-align: center; min-width: 150px;">
-                    <div style="font-size: 24px;">${attack.icon}</div>
-                    <strong style="color: ${attack.color};">${attack.name}</strong><br>
-                    <small>Target: ${city.name}</small><br>
-                    <small style="color: #888;">${new Date().toLocaleTimeString()}</small>
+            // Bind popup with attack info
+            const popupContent = `
+                <div style="text-align: center; min-width: 200px;">
+                    <div style="font-size: 28px;">${attack.icon}</div>
+                    <strong style="color: ${attack.color}; font-size: 13px;">${attack.name}</strong><br>
+                    <hr style="margin: 8px 0; border-color: #333;">
+                    <table style="width: 100%; font-size: 11px; text-align: left;">
+                        <tr>
+                            <td style="color: #888;">Source IP:</td>
+                            <td><code style="color: ${attack.color};">${attackerIP}</code></td>
+                        </tr>
+                        <tr>
+                            <td style="color: #888;">Origin:</td>
+                            <td style="color: #fff;">${source.city}, ${source.country}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #888;">Target:</td>
+                            <td><code style="color: #00ff88;">${serverLocation.ip}</code></td>
+                        </tr>
+                        <tr>
+                            <td style="color: #888;">Severity:</td>
+                            <td><span class="badge bg-${attack.severity === 'critical' ? 'danger' : attack.severity === 'high' ? 'warning' : 'info'}" style="font-size: 9px;">${attack.severity.toUpperCase()}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="color: #888;">Time:</td>
+                            <td style="color: #aaa;">${new Date().toLocaleTimeString()}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top: 8px;">
+                        <span class="badge bg-success" style="font-size: 9px;">🛡️ BLOCKED BY LOG SENTINEL</span>
+                    </div>
                 </div>
-            `).openPopup();
+            `;
 
-            // Increment attack counter
+            sourceMarker.bindPopup(popupContent);
+            attackLine.bindPopup(popupContent);
+
+            // Update counters
             attackCount++;
-            document.querySelector('#attack-count .fw-bold').textContent = attackCount;
+            blockedCount++;
+            document.getElementById('attack-count-num').textContent = attackCount;
+            document.getElementById('blocked-count-num').textContent = blockedCount;
 
-            // Remove marker after 3 seconds
+            // Remove attack visualization after 4 seconds
             setTimeout(() => {
-                cyberMap.removeLayer(marker);
-            }, 3000);
+                cyberMap.removeLayer(attackLine);
+                cyberMap.removeLayer(sourceMarker);
+            }, 4000);
         }
 
         // Start attack simulation every 1.5 seconds
         setInterval(simulateAttack, 1500);
 
-        // Initial attack
-        setTimeout(simulateAttack, 500);
+        // Initial attacks
+        setTimeout(simulateAttack, 300);
+        setTimeout(simulateAttack, 800);
     </script>
 
     <!-- SweetAlert2 -->

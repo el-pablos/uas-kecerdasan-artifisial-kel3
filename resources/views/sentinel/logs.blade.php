@@ -25,6 +25,143 @@
             height: 100%;
             border-radius: 3px;
         }
+
+        /* ========================================
+           PAGINATION FIX - Override Velzon Conflicts
+           ======================================== */
+        
+        /* Reset problematic pseudo-elements */
+        .pagination .page-item .page-link::before,
+        .pagination .page-item .page-link::after,
+        .pagination .page-item::before,
+        .pagination .page-item::after,
+        nav[aria-label="Pagination Navigation"] .page-link::before,
+        nav[aria-label="Pagination Navigation"] .page-link::after {
+            content: none !important;
+            display: none !important;
+        }
+
+        /* Base pagination container */
+        .pagination,
+        nav[aria-label="Pagination Navigation"] > span {
+            display: flex !important;
+            flex-wrap: wrap;
+            padding-left: 0;
+            list-style: none;
+            gap: 4px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* Pagination items */
+        .pagination .page-item,
+        nav[aria-label="Pagination Navigation"] span a,
+        nav[aria-label="Pagination Navigation"] span span {
+            display: inline-flex !important;
+        }
+
+        /* Pagination links styling */
+        .pagination .page-link,
+        nav[aria-label="Pagination Navigation"] span a,
+        nav[aria-label="Pagination Navigation"] span > span:not(.relative) {
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--vz-body-color, #212529);
+            text-decoration: none;
+            background-color: var(--vz-secondary-bg, #fff);
+            border: 1px solid var(--vz-border-color, #dee2e6);
+            border-radius: 0.25rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+            min-width: 36px;
+            min-height: 36px;
+        }
+
+        /* Hover state */
+        .pagination .page-link:hover,
+        nav[aria-label="Pagination Navigation"] span a:hover {
+            z-index: 2;
+            color: var(--vz-link-hover-color, #405189);
+            background-color: var(--vz-tertiary-bg, #e9ecef);
+            border-color: var(--vz-border-color, #dee2e6);
+            text-decoration: none;
+        }
+
+        /* Focus state */
+        .pagination .page-link:focus,
+        nav[aria-label="Pagination Navigation"] span a:focus {
+            z-index: 3;
+            color: var(--vz-link-hover-color, #405189);
+            background-color: var(--vz-tertiary-bg, #e9ecef);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(64, 81, 137, 0.25);
+        }
+
+        /* Active state */
+        .pagination .page-item.active .page-link,
+        nav[aria-label="Pagination Navigation"] span span[aria-current="page"] span {
+            z-index: 3;
+            color: #fff !important;
+            background-color: #405189 !important;
+            border-color: #405189 !important;
+        }
+
+        /* Disabled state */
+        .pagination .page-item.disabled .page-link,
+        nav[aria-label="Pagination Navigation"] span > span.cursor-default,
+        nav[aria-label="Pagination Navigation"] span span[aria-disabled="true"] {
+            color: var(--vz-secondary-color, #6c757d) !important;
+            pointer-events: none;
+            background-color: var(--vz-secondary-bg, #fff);
+            border-color: var(--vz-border-color, #dee2e6);
+            opacity: 0.65;
+        }
+
+        /* SVG icons in pagination */
+        .pagination svg,
+        nav[aria-label="Pagination Navigation"] svg {
+            width: 16px !important;
+            height: 16px !important;
+            fill: currentColor;
+        }
+
+        /* Hide default arrow text, show only icons */
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            font-size: 0.8125rem;
+        }
+
+        /* Dark mode adjustments */
+        [data-bs-theme="dark"] .pagination .page-link,
+        [data-bs-theme="dark"] nav[aria-label="Pagination Navigation"] span a,
+        [data-bs-theme="dark"] nav[aria-label="Pagination Navigation"] span > span {
+            background-color: var(--vz-input-bg, #212529);
+            border-color: var(--vz-border-color, #495057);
+            color: var(--vz-body-color, #adb5bd);
+        }
+
+        [data-bs-theme="dark"] .pagination .page-link:hover,
+        [data-bs-theme="dark"] nav[aria-label="Pagination Navigation"] span a:hover {
+            background-color: var(--vz-tertiary-bg, #343a40);
+            color: #fff;
+        }
+
+        /* Relative wrapper fix for Tailwind pagination */
+        nav[aria-label="Pagination Navigation"] .relative.inline-flex {
+            display: inline-flex !important;
+            gap: 4px;
+        }
+
+        /* Text indicators between pages */
+        nav[aria-label="Pagination Navigation"] span.relative {
+            display: inline-flex !important;
+            align-items: center;
+        }
     </style>
 @endsection
 
