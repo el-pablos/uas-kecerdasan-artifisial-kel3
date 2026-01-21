@@ -178,4 +178,45 @@ class DashboardTest extends TestCase
         $response->assertViewHas('totalAnomalies', 3);
         $response->assertViewHas('totalNormal', 7);
     }
+
+    /**
+     * Test: Dashboard menampilkan System Status Badge (Cyber Command Center).
+     *
+     * @return void
+     */
+    public function test_dashboard_displays_system_status_badge(): void
+    {
+        $response = $this->actingAs($this->user)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('SYSTEM MONITORING: ACTIVE');
+    }
+
+    /**
+     * Test: Dashboard menampilkan Live Cyber Threat Map container.
+     *
+     * @return void
+     */
+    public function test_dashboard_displays_cyber_threat_map(): void
+    {
+        $response = $this->actingAs($this->user)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('cyber-map');
+        $response->assertSee('Live Cyber Threat Map');
+        $response->assertSee('SIMULATED ATTACKS');
+    }
+
+    /**
+     * Test: Dashboard memuat Leaflet.js library untuk threat map.
+     *
+     * @return void
+     */
+    public function test_dashboard_loads_leaflet_library(): void
+    {
+        $response = $this->actingAs($this->user)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('leaflet');
+    }
 }

@@ -59,7 +59,85 @@
             border-radius: 3px;
             transition: width 0.5s ease;
         }
+        /* System Status Pulse Indicator */
+        .system-status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 8px 16px;
+            border-radius: 25px;
+            border: 1px solid #0f3460;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+        }
+        .system-status-text {
+            color: #00ff88;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #00ff88;
+            border-radius: 50%;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+                transform: scale(1.1);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+                transform: scale(1);
+            }
+        }
+        /* Cyber Map Styling */
+        #cyber-map {
+            background: #0a0a0a;
+            border-radius: 10px;
+            border: 1px solid #1a1a2e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .attack-marker {
+            animation: marker-pulse 0.5s ease-out;
+        }
+        @keyframes marker-pulse {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(26, 26, 46, 0.95);
+            color: #ff4757;
+            border: 1px solid #ff4757;
+            border-radius: 8px;
+        }
+        .leaflet-popup-tip {
+            background: rgba(26, 26, 46, 0.95);
+        }
+        .leaflet-popup-content {
+            margin: 10px 15px;
+            font-size: 12px;
+        }
     </style>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 @endsection
 
 @section('content')
@@ -79,7 +157,12 @@
                         Sistem Deteksi Anomali Real-time
                     </p>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center">
+                    <!-- System Status Pulse Indicator -->
+                    <div class="system-status-badge me-3">
+                        <span class="system-status-text">SYSTEM MONITORING: ACTIVE</span>
+                        <span class="pulse-dot"></span>
+                    </div>
                     <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle" type="button" id="simulateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="ri-bug-line me-1"></i> Simulasi Serangan
@@ -351,6 +434,45 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Cyber Threat Map -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-0 align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">
+                        <span class="live-indicator me-2"></span>
+                        <i class="ri-earth-line me-2 text-danger"></i>Live Cyber Threat Map
+                    </h4>
+                    <div class="flex-shrink-0">
+                        <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                            <i class="ri-fire-line me-1"></i>SIMULATED ATTACKS
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="cyber-map" style="height: 400px; border-radius: 8px; border: 2px solid rgba(239, 68, 68, 0.3);"></div>
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex align-items-center">
+                                <span class="pulse-dot me-2"></span>
+                                <span class="small text-muted">Active Attack Point</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-2" style="width: 12px; height: 12px; border-radius: 50%;"></span>
+                                <span class="small text-muted">DDoS Attack</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-danger me-2" style="width: 12px; height: 12px; border-radius: 50%;"></span>
+                                <span class="small text-muted">Intrusion Attempt</span>
+                            </div>
+                        </div>
+                        <span class="small text-muted" id="attack-count">Attacks detected: <span class="fw-bold text-danger">0</span></span>
                     </div>
                 </div>
             </div>
@@ -690,6 +812,95 @@
                     }
                 });
         }, 30000);
+    </script>
+
+    <!-- Leaflet.js Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize Cyber Threat Map
+        const cyberMap = L.map('cyber-map', {
+            zoomControl: true,
+            attributionControl: false
+        }).setView([20, 0], 2);
+
+        // Dark themed map tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            subdomains: 'abcd'
+        }).addTo(cyberMap);
+
+        // Attack simulation data
+        const attackTypes = [
+            { name: 'DDoS Attack', color: '#f59e0b', icon: '🔥' },
+            { name: 'SQL Injection', color: '#ef4444', icon: '💉' },
+            { name: 'Brute Force', color: '#f97316', icon: '🔨' },
+            { name: 'Malware Upload', color: '#dc2626', icon: '🦠' },
+            { name: 'XSS Attack', color: '#ea580c', icon: '⚡' },
+            { name: 'Port Scan', color: '#fbbf24', icon: '🔍' }
+        ];
+
+        const targetCities = [
+            { name: 'Jakarta', lat: -6.2088, lng: 106.8456 },
+            { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
+            { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
+            { name: 'New York', lat: 40.7128, lng: -74.0060 },
+            { name: 'London', lat: 51.5074, lng: -0.1278 },
+            { name: 'Sydney', lat: -33.8688, lng: 151.2093 },
+            { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+            { name: 'São Paulo', lat: -23.5505, lng: -46.6333 },
+            { name: 'Moscow', lat: 55.7558, lng: 37.6173 },
+            { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
+            { name: 'Seoul', lat: 37.5665, lng: 126.9780 },
+            { name: 'Frankfurt', lat: 50.1109, lng: 8.6821 }
+        ];
+
+        let attackCount = 0;
+
+        function simulateAttack() {
+            // Random city and attack type
+            const city = targetCities[Math.floor(Math.random() * targetCities.length)];
+            const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+            
+            // Add some randomness to coordinates
+            const lat = city.lat + (Math.random() - 0.5) * 2;
+            const lng = city.lng + (Math.random() - 0.5) * 2;
+
+            // Create pulsing marker
+            const marker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: attack.color,
+                color: attack.color,
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8,
+                className: 'attack-marker'
+            }).addTo(cyberMap);
+
+            // Add popup
+            marker.bindPopup(`
+                <div style="text-align: center; min-width: 150px;">
+                    <div style="font-size: 24px;">${attack.icon}</div>
+                    <strong style="color: ${attack.color};">${attack.name}</strong><br>
+                    <small>Target: ${city.name}</small><br>
+                    <small style="color: #888;">${new Date().toLocaleTimeString()}</small>
+                </div>
+            `).openPopup();
+
+            // Increment attack counter
+            attackCount++;
+            document.querySelector('#attack-count .fw-bold').textContent = attackCount;
+
+            // Remove marker after 3 seconds
+            setTimeout(() => {
+                cyberMap.removeLayer(marker);
+            }, 3000);
+        }
+
+        // Start attack simulation every 1.5 seconds
+        setInterval(simulateAttack, 1500);
+
+        // Initial attack
+        setTimeout(simulateAttack, 500);
     </script>
 
     <!-- SweetAlert2 -->
