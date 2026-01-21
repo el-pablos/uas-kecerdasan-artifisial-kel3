@@ -9,6 +9,7 @@ Microservice ini bertanggung jawab untuk:
 2. Melakukan preprocessing dan encoding data
 3. Mendeteksi anomali menggunakan algoritma Isolation Forest
 4. Mengembalikan hasil prediksi ke Laravel
+5. Menghasilkan visualisasi PCA untuk Explainable AI
 
 Tim Pengembang:
 - JEREMY CHRISTO EMMANUELLE PANJAITAN (237006516084)
@@ -21,11 +22,20 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import LabelEncoder
+from sklearn.decomposition import PCA
 import numpy as np
 import pandas as pd
 import joblib
 import os
 from datetime import datetime
+import base64
+from io import BytesIO
+
+# Import untuk visualisasi
+import matplotlib
+matplotlib.use('Agg')  # Backend non-interactive untuk server
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Inisialisasi aplikasi Flask
 app = Flask(__name__)
@@ -38,6 +48,8 @@ CORS(app)  # Mengizinkan Cross-Origin Request dari Laravel
 # Variabel global untuk menyimpan model dan encoder
 model = None
 label_encoders = {}
+pca_model = None  # PCA untuk reduksi dimensi
+log_history = []  # Menyimpan history log untuk visualisasi
 
 # Daftar HTTP methods yang dikenali sistem
 HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
@@ -98,10 +110,10 @@ def generate_training_data():
 
 def initialize_model():
     """
-    Menginisialisasi dan melatih model Isolation Forest.
+    Menginisialisasi dan melatih model Isolation Forest serta PCA.
     Model dilatih dengan data dummy normal saat startup.
     """
-    global model, label_encoders
+    global model, label_encoders, pca_model
     
     print("[INFO] Memulai inisialisasi model Isolation Forest...")
     
@@ -138,7 +150,12 @@ def initialize_model():
     # Latih model dengan data normal
     model.fit(fitur_training)
     
+    # Inisialisasi PCA untuk reduksi dimensi (6 fitur -> 2 dimensi)
+    pca_model = PCA(n_components=2, random_state=42)
+    pca_model.fit(fitur_training)
+    
     print("[INFO] Model Isolation Forest berhasil diinisialisasi!")
+    print("[INFO] PCA Model berhasil diinisialisasi!")
     print(f"[INFO] Jumlah sampel training: {len(fitur_training)}")
 
 
@@ -503,6 +520,174 @@ def model_info():
         },
         'timestamp': datetime.now().isoformat()
     })
+
+
+@app.route('/visualize', methods=['POST'])
+def visualize_pca():
+    """
+    Endpoint untuk menghasilkan visualisasi PCA Scatter Plot.
+    Menerima data log dari Laravel dan menghasilkan gambar base64.
+    
+    Request Body (JSON):
+        - logs: Array of log objects dengan fitur dan prediksi
+    
+    Response (JSON):
+        - status: success/error
+        - image_base64: String base64 dari gambar scatter plot
+        - statistics: Statistik dari data yang divisualisasikan
+    """
+    global pca_model
+    
+    try:
+        if not request.is_json:
+            return jsonify({
+                'error': 'Request harus dalam format JSON',
+                'status': 'error'
+            }), 400
+        
+        data = request.get_json()
+        logs = data.get('logs', [])
+        
+        if not logs or len(logs) < 2:
+            # Jika data kurang dari 2, gunakan data training dummy
+            return jsonify({
+                'status': 'success',
+                'message': 'Data tidak cukup untuk visualisasi (minimal 2 data point)',
+                'image_base64': None,
+                'statistics': {
+                    'total_points': len(logs),
+                    'normal_count': 0,
+                    'anomaly_count': 0
+                }
+            })
+        
+        # Preprocessing semua log data
+        features_list = []
+        predictions = []
+        
+        for log_data in logs:
+            try:
+                fitur = preprocess_log_data(log_data)
+                features_list.append(fitur[0])
+                
+                # Gunakan prediksi dari database jika ada, jika tidak predict
+                if 'prediction' in log_data:
+                    pred = -1 if log_data['prediction'] == 'anomaly' else 1
+                else:
+                    pred = model.predict(fitur)[0]
+                predictions.append(pred)
+            except Exception as e:
+                print(f"[WARN] Gagal memproses log: {str(e)}")
+                continue
+        
+        if len(features_list) < 2:
+            return jsonify({
+                'status': 'success',
+                'message': 'Data valid tidak cukup untuk visualisasi',
+                'image_base64': None,
+                'statistics': {
+                    'total_points': len(features_list),
+                    'normal_count': 0,
+                    'anomaly_count': 0
+                }
+            })
+        
+        # Convert ke numpy array
+        features_array = np.array(features_list)
+        predictions_array = np.array(predictions)
+        
+        # Reduksi dimensi menggunakan PCA
+        pca_result = pca_model.transform(features_array)
+        
+        # Hitung statistik
+        normal_count = int(np.sum(predictions_array == 1))
+        anomaly_count = int(np.sum(predictions_array == -1))
+        
+        # Generate Scatter Plot
+        plt.figure(figsize=(10, 8), facecolor='white')
+        
+        # Set style
+        sns.set_style("whitegrid")
+        
+        # Pisahkan data normal dan anomali
+        normal_mask = predictions_array == 1
+        anomaly_mask = predictions_array == -1
+        
+        # Plot data normal (biru)
+        if np.any(normal_mask):
+            plt.scatter(
+                pca_result[normal_mask, 0], 
+                pca_result[normal_mask, 1],
+                c='#2196F3',  # Biru
+                label=f'Normal ({normal_count})',
+                alpha=0.7,
+                s=80,
+                edgecolors='white',
+                linewidths=1
+            )
+        
+        # Plot data anomali (merah)
+        if np.any(anomaly_mask):
+            plt.scatter(
+                pca_result[anomaly_mask, 0], 
+                pca_result[anomaly_mask, 1],
+                c='#F44336',  # Merah
+                label=f'Anomaly ({anomaly_count})',
+                alpha=0.9,
+                s=120,
+                marker='X',
+                edgecolors='white',
+                linewidths=1
+            )
+        
+        # Styling
+        plt.xlabel('Principal Component 1 (PC1)', fontsize=12, fontweight='bold')
+        plt.ylabel('Principal Component 2 (PC2)', fontsize=12, fontweight='bold')
+        plt.title('PCA Scatter Plot: Anomaly Distribution Map', fontsize=14, fontweight='bold', pad=20)
+        plt.legend(loc='upper right', fontsize=10, framealpha=0.9)
+        
+        # Tambahkan grid
+        plt.grid(True, alpha=0.3)
+        
+        # Tambahkan info variance explained
+        variance_ratio = pca_model.explained_variance_ratio_
+        info_text = f'Variance Explained: PC1={variance_ratio[0]*100:.1f}%, PC2={variance_ratio[1]*100:.1f}%'
+        plt.figtext(0.5, 0.02, info_text, ha='center', fontsize=10, style='italic', color='gray')
+        
+        plt.tight_layout(rect=[0, 0.03, 1, 1])
+        
+        # Convert plot ke base64
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight', facecolor='white')
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        plt.close()
+        
+        print(f"[INFO] Visualisasi PCA berhasil: {normal_count} normal, {anomaly_count} anomali")
+        
+        return jsonify({
+            'status': 'success',
+            'image_base64': image_base64,
+            'statistics': {
+                'total_points': len(features_list),
+                'normal_count': normal_count,
+                'anomaly_count': anomaly_count,
+                'variance_explained': {
+                    'pc1': round(variance_ratio[0] * 100, 2),
+                    'pc2': round(variance_ratio[1] * 100, 2),
+                    'total': round((variance_ratio[0] + variance_ratio[1]) * 100, 2)
+                }
+            },
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Gagal membuat visualisasi: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
 
 
 # ========================================

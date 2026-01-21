@@ -258,6 +258,105 @@
         </div>
     </div>
 
+    <!-- PCA Visualization: Anomaly Distribution Map -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-0 align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">
+                        <i class="ri-scatter-chart-line me-2 text-primary"></i>
+                        Anomaly Distribution Map
+                        <span class="badge bg-info-subtle text-info ms-2">PCA Visualization</span>
+                    </h4>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="btn btn-soft-primary btn-sm" onclick="refreshPcaVisualization()">
+                            <i class="ri-refresh-line me-1"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div id="pcaVisualizationContainer" class="text-center">
+                                @if($pcaVisualization['available'] && $pcaVisualization['image_base64'])
+                                    <img src="data:image/png;base64,{{ $pcaVisualization['image_base64'] }}" 
+                                         alt="PCA Scatter Plot" 
+                                         class="img-fluid rounded shadow-sm"
+                                         style="max-height: 500px;">
+                                @else
+                                    <div class="py-5">
+                                        <i class="ri-scatter-chart-line text-muted" style="font-size: 4rem;"></i>
+                                        <p class="text-muted mt-3">{{ $pcaVisualization['message'] ?? 'Visualisasi tidak tersedia' }}</p>
+                                        <small class="text-muted">Pastikan ML Service aktif dan terdapat data log untuk divisualisasikan.</small>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="text-muted mb-3">
+                                    <i class="ri-information-line me-1"></i> Tentang Visualisasi
+                                </h6>
+                                <p class="small text-muted mb-3">
+                                    Grafik ini menampilkan distribusi data log server menggunakan 
+                                    <strong>Principal Component Analysis (PCA)</strong> untuk mereduksi 
+                                    6 fitur menjadi 2 dimensi yang dapat divisualisasikan.
+                                </p>
+                                
+                                @if($pcaVisualization['statistics'])
+                                    <div class="border-top pt-3">
+                                        <h6 class="text-muted mb-2">Statistik Data</h6>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="small">Total Data Points:</span>
+                                            <span class="fw-bold">{{ $pcaVisualization['statistics']['total_points'] ?? 0 }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="small"><i class="ri-checkbox-blank-circle-fill text-primary me-1"></i>Normal:</span>
+                                            <span class="fw-bold text-primary">{{ $pcaVisualization['statistics']['normal_count'] ?? 0 }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="small"><i class="ri-close-circle-fill text-danger me-1"></i>Anomaly:</span>
+                                            <span class="fw-bold text-danger">{{ $pcaVisualization['statistics']['anomaly_count'] ?? 0 }}</span>
+                                        </div>
+                                        @if(isset($pcaVisualization['statistics']['variance_explained']))
+                                            <div class="border-top pt-2 mt-2">
+                                                <h6 class="text-muted mb-2 small">Variance Explained</h6>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="small">PC1:</span>
+                                                    <span class="small fw-bold">{{ $pcaVisualization['statistics']['variance_explained']['pc1'] }}%</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="small">PC2:</span>
+                                                    <span class="small fw-bold">{{ $pcaVisualization['statistics']['variance_explained']['pc2'] }}%</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="small">Total:</span>
+                                                    <span class="small fw-bold text-success">{{ $pcaVisualization['statistics']['variance_explained']['total'] }}%</span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                <div class="border-top pt-3 mt-3">
+                                    <h6 class="text-muted mb-2">Legenda</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary me-2" style="width: 12px; height: 12px; border-radius: 50%;"></span>
+                                        <span class="small">Data Normal (Traffic Aman)</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger me-2" style="width: 12px; height: 12px;"></span>
+                                        <span class="small">Data Anomali (Potensi Ancaman)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Live Monitoring Table -->
     <div class="row">
         <div class="col-12">
@@ -543,6 +642,18 @@
         // Fungsi Refresh Dashboard
         function refreshDashboard() {
             location.reload();
+        }
+
+        // Fungsi Refresh PCA Visualization
+        function refreshPcaVisualization() {
+            var container = document.getElementById('pcaVisualizationContainer');
+            container.innerHTML = '<div class="py-5 text-center"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-muted">Memuat visualisasi PCA...</p></div>';
+            
+            // Reload page untuk mendapatkan visualisasi terbaru
+            // Karena visualisasi digenerate di server-side
+            setTimeout(function() {
+                location.reload();
+            }, 500);
         }
 
         // Fungsi Refresh Chart

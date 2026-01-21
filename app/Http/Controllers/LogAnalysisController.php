@@ -75,6 +75,9 @@ class LogAnalysisController extends Controller
             ->highSeverity(70)
             ->count();
 
+        // Ambil visualisasi PCA dari ML Service
+        $pcaVisualization = $this->getPcaVisualization();
+
         return view('sentinel.dashboard', compact(
             'totalLogs',
             'totalAnomalies',
@@ -82,7 +85,8 @@ class LogAnalysisController extends Controller
             'threatPercentage',
             'recentLogs',
             'chartData',
-            'highSeverityCount'
+            'highSeverityCount',
+            'pcaVisualization'
         ));
     }
 
@@ -465,6 +469,89 @@ class LogAnalysisController extends Controller
             return [
                 'status' => 'offline',
                 'message' => 'ML Service tidak dapat dihubungi',
+            ];
+        }
+    }
+
+    /**
+     * Mengambil visualisasi PCA Scatter Plot dari ML Service.
+     * 
+     * Mengirim data log ke ML Service untuk divisualisasikan
+     * menggunakan Principal Component Analysis (PCA).
+     *
+     * @return array
+     */
+    protected function getPcaVisualization(): array
+    {
+        try {
+            // Ambil log terbaru untuk visualisasi (maksimal 200 data point)
+            $logs = ServerLog::orderBy('created_at', 'desc')
+                ->take(200)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                return [
+                    'available' => false,
+                    'message' => 'Belum ada data log untuk divisualisasikan',
+                    'image_base64' => null,
+                    'statistics' => null,
+                ];
+            }
+
+            // Format data untuk dikirim ke ML Service
+            $logsData = $logs->map(function ($log) {
+                return [
+                    'ip_address' => $log->ip_address,
+                    'method' => $log->method,
+                    'url' => $log->url,
+                    'status_code' => $log->status_code,
+                    'user_agent' => $log->user_agent,
+                    'response_time' => $log->response_time,
+                    'prediction' => $log->prediction_result, // Kirim prediksi dari DB
+                ];
+            })->toArray();
+
+            // Kirim ke ML Service untuk visualisasi
+            $response = Http::timeout(30) // Timeout lebih lama untuk generate gambar
+                ->post("{$this->mlServiceUrl}/visualize", [
+                    'logs' => $logsData,
+                ]);
+
+            if (!$response->successful()) {
+                return [
+                    'available' => false,
+                    'message' => 'Gagal mengambil visualisasi dari ML Service',
+                    'image_base64' => null,
+                    'statistics' => null,
+                ];
+            }
+
+            $result = $response->json();
+
+            if ($result['status'] !== 'success' || empty($result['image_base64'])) {
+                return [
+                    'available' => false,
+                    'message' => $result['message'] ?? 'Visualisasi tidak tersedia',
+                    'image_base64' => null,
+                    'statistics' => $result['statistics'] ?? null,
+                ];
+            }
+
+            return [
+                'available' => true,
+                'message' => 'Visualisasi PCA berhasil dimuat',
+                'image_base64' => $result['image_base64'],
+                'statistics' => $result['statistics'],
+            ];
+
+        } catch (\Exception $e) {
+            Log::warning('Gagal mengambil visualisasi PCA: ' . $e->getMessage());
+            
+            return [
+                'available' => false,
+                'message' => 'ML Service tidak tersedia untuk visualisasi',
+                'image_base64' => null,
+                'statistics' => null,
             ];
         }
     }
