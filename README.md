@@ -319,6 +319,6 @@ Proyek ini dibuat untuk keperluan akademis pada mata kuliah Kecerdasan Artifisia
 
 **© 2026 - Log Sentinel Team**
 
-*Universitas Negeri Jakarta*
+*Universitas Nasional Jakarta*
 
 </div>
