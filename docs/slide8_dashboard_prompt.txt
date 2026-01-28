@@ -1,0 +1,41 @@
+
+========================================
+🎨 PROMPT UNTUK MIDJOURNEY / DALL-E
+Dashboard Concept - Log Sentinel
+========================================
+
+--- ENGLISH PROMPT (Recommended) ---
+
+"Futuristic cybersecurity command center dashboard, dark mode UI, black background (#0a0a0a). 
+
+Main feature: Interactive world map in center with dark continent outlines. Multiple curved NEON GREEN (#00ff88) attack lines originating from various countries (Russia, China, USA, Brazil) all converging to a single glowing target point in INDONESIA (Jakarta). 
+
+Left panel: Real-time statistics cards showing "Total Requests: 15,234", "Anomalies: 1,523", "Threat Level: 10%", with green/red indicators. 
+
+Right panel: Recent activity log table with color-coded rows - green for normal, red for anomaly. 
+
+Top bar: "LOG SENTINEL" logo with shield icon, system status "ACTIVE" with pulsing green dot. 
+
+Style: Clean UI, glassmorphism effects, subtle grid overlay, professional enterprise security software aesthetic. 
+
+Technical elements: IP addresses visible in popups, severity badges (Critical/High/Medium), timestamps.
+
+Mood: Vigilant, high-tech, mission control atmosphere.
+
+--ar 16:9 --v 6"
+
+
+--- PROMPT INDONESIA (Alternative) ---
+
+"Dashboard pusat komando keamanan siber futuristik, UI mode gelap, latar belakang hitam. 
+
+Fitur utama: Peta dunia interaktif di tengah dengan outline benua gelap. Beberapa garis serangan HIJAU NEON melengkung berasal dari berbagai negara (Rusia, China, USA, Brasil) semuanya menuju satu titik target yang menyala di INDONESIA (Jakarta).
+
+Panel kiri: Kartu statistik real-time. Panel kanan: Tabel log aktivitas terkini.
+
+Gaya: UI bersih, efek glassmorphism, estetika software keamanan enterprise profesional.
+
+--ar 16:9 --v 6"
+
+========================================
+    

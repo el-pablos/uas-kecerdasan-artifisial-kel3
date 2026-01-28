@@ -173,6 +173,140 @@
         .server-marker {
             animation: server-pulse 2s infinite;
         }
+        
+        /* Fluid Simulation Styling */
+        .dropdown-menu {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .dropdown-item {
+            color: #e0e0e0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 2px 0;
+        }
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 107, 129, 0.1) 100%);
+            color: #ff4757;
+            transform: translateX(5px);
+            box-shadow: inset 3px 0 0 #ff4757;
+        }
+        .dropdown-item i {
+            transition: all 0.3s ease;
+        }
+        .dropdown-item:hover i {
+            transform: scale(1.2);
+            color: #ff4757;
+        }
+        .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+        
+        /* Simulation Progress Overlay */
+        .simulation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        .simulation-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .simulation-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 71, 87, 0.2);
+            border-top-color: #ff4757;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .simulation-text {
+            color: #ff4757;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 20px;
+            letter-spacing: 2px;
+        }
+        .simulation-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 71, 87, 0.2);
+            border-radius: 2px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .simulation-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+            width: 0%;
+            animation: progress-flow 2s ease-in-out forwards;
+        }
+        @keyframes progress-flow {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        /* Attack Counter Animation */
+        .attack-counter {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            animation: counter-pulse 0.5s ease;
+        }
+        @keyframes counter-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Success Toast */
+        .simulation-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #00ff88;
+            border-radius: 12px;
+            padding: 20px 30px;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.3);
+            z-index: 10000;
+            transform: translateX(150%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .simulation-toast.show {
+            transform: translateX(0);
+        }
+        .simulation-toast-title {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        .simulation-toast-body {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+        }
     </style>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -744,61 +878,120 @@
         var distributionChart = new ApexCharts(document.querySelector("#distributionChart"), distributionChartOptions);
         distributionChart.render();
 
-        // Fungsi Simulasi Serangan
+        // Attack Type Names untuk display
+        const attackTypeNames = {
+            'ddos': 'DDoS Attack',
+            'bruteforce': 'Brute Force Login',
+            'sql_injection': 'SQL Injection',
+            'path_traversal': 'Path Traversal',
+            'random': 'Random Mixed Attack'
+        };
+
+        // Fungsi Simulasi Serangan dengan Fluid Animation
         function simulateAttack(attackType) {
-            Swal.fire({
-                title: 'Simulasi Serangan',
-                text: 'Apakah Anda yakin ingin menjalankan simulasi ' + attackType.toUpperCase() + '?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Jalankan!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Tampilkan loading
-                    Swal.fire({
-                        title: 'Menjalankan Simulasi...',
-                        html: 'Generating attack patterns...',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // Kirim request simulasi
-                    fetch('{{ route("api.simulate") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            attack_type: attackType,
-                            count: 10
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        Swal.fire({
-                            title: 'Simulasi Selesai!',
-                            html: `<strong>${data.total_generated}</strong> log serangan berhasil digenerate.<br>Silakan cek tabel monitoring.`,
-                            icon: 'success',
-                            timer: 3000
-                        });
-
-                        // Refresh dashboard
-                        refreshDashboard();
-                    })
-                    .catch(error => {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Gagal menjalankan simulasi: ' + error.message,
-                            icon: 'error'
-                        });
+            const attackName = attackTypeNames[attackType] || attackType.toUpperCase();
+            
+            // Buat overlay elemen
+            let overlay = document.querySelector('.simulation-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'simulation-overlay';
+                overlay.innerHTML = `
+                    <div class="simulation-spinner"></div>
+                    <div class="simulation-text">EXECUTING ATTACK SIMULATION</div>
+                    <div class="simulation-progress">
+                        <div class="simulation-progress-bar"></div>
+                    </div>
+                    <div class="attack-counter" style="margin-top: 20px;">0</div>
+                    <div style="color: #888; font-size: 0.9rem;">logs generated</div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            // Buat toast elemen
+            let toast = document.querySelector('.simulation-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'simulation-toast';
+                toast.innerHTML = `
+                    <div class="simulation-toast-title"><i class="ri-shield-check-line me-2"></i>Simulasi Selesai</div>
+                    <div class="simulation-toast-body">0 serangan terdeteksi</div>
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            // Tampilkan overlay dengan animasi
+            requestAnimationFrame(() => {
+                overlay.classList.add('active');
+                overlay.querySelector('.simulation-text').textContent = `EXECUTING ${attackName.toUpperCase()}`;
+                overlay.querySelector('.attack-counter').textContent = '0';
+                overlay.querySelector('.simulation-progress-bar').style.animation = 'none';
+                requestAnimationFrame(() => {
+                    overlay.querySelector('.simulation-progress-bar').style.animation = 'progress-flow 2s ease-in-out forwards';
+                });
+            });
+            
+            // Simulasi counter animation
+            let counter = 0;
+            const counterEl = overlay.querySelector('.attack-counter');
+            const counterInterval = setInterval(() => {
+                if (counter < 10) {
+                    counter++;
+                    counterEl.textContent = counter;
+                    counterEl.style.animation = 'none';
+                    requestAnimationFrame(() => {
+                        counterEl.style.animation = 'counter-pulse 0.3s ease';
                     });
                 }
+            }, 150);
+
+            // Kirim request simulasi
+            fetch('{{ route("api.simulate") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    attack_type: attackType,
+                    count: 10
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(counterInterval);
+                counterEl.textContent = data.total_generated;
+                
+                // Delay sebelum hide overlay
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    
+                    // Tampilkan toast
+                    toast.querySelector('.simulation-toast-body').innerHTML = 
+                        `<strong>${data.total_generated}</strong> ${attackName} logs berhasil digenerate`;
+                    toast.classList.add('show');
+                    
+                    // Auto hide toast
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        // Refresh setelah toast hilang
+                        setTimeout(() => {
+                            refreshDashboard();
+                        }, 500);
+                    }, 3000);
+                }, 800);
+            })
+            .catch(error => {
+                clearInterval(counterInterval);
+                overlay.classList.remove('active');
+                
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Gagal menjalankan simulasi: ' + error.message,
+                    icon: 'error',
+                    background: '#1a1a2e',
+                    color: '#fff'
+                });
             });
         }
 
@@ -973,7 +1166,7 @@
             });
         }
 
-        function simulateAttack() {
+        function simulateMapAttack() {
             // Random attacker and attack type
             const source = attackerSources[Math.floor(Math.random() * attackerSources.length)];
             const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
@@ -1051,12 +1244,12 @@
             }, 4000);
         }
 
-        // Start attack simulation every 1.5 seconds
-        setInterval(simulateAttack, 1500);
+        // Start map attack simulation every 1.5 seconds
+        setInterval(simulateMapAttack, 1500);
 
-        // Initial attacks
-        setTimeout(simulateAttack, 300);
-        setTimeout(simulateAttack, 800);
+        // Initial map attacks
+        setTimeout(simulateMapAttack, 300);
+        setTimeout(simulateMapAttack, 800);
     </script>
 
     <!-- SweetAlert2 -->

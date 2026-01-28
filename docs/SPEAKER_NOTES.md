@@ -46,7 +46,7 @@ Inilah mengapa kami membangun Log Sentinel. **Biarkan mesin yang bekerja.** Biar
 
 ---
 
-## SLIDE 3: RELEVANSI MATA KULIAH AI
+## SLIDE 3: SOLUSI BERBASIS AI
 ### Machine Learning + Cybersecurity = Log Sentinel
 
 **[DURASI: 1.5 menit]**
@@ -55,17 +55,19 @@ Inilah mengapa kami membangun Log Sentinel. **Biarkan mesin yang bekerja.** Biar
 
 *[Tunjuk diagram Venn di slide]*
 
-Lihat irisan ini. Di satu sisi ada **Machine Learning** — teori yang kita pelajari: supervised learning, unsupervised learning, feature engineering, model evaluation.
+Lihat irisan ini. Di satu sisi ada **Machine Learning** — kemampuan sistem untuk belajar dari data tanpa diprogram secara eksplisit.
 
 Di sisi lain ada **Cybersecurity** — domain yang dealing dengan threat actors, attack vectors, dan incident response.
 
-**Log Sentinel** ada di irisan itu.
+**Log Sentinel** ada tepat di irisan itu.
 
-Kami tidak sekadar mengimplementasikan algoritma lalu selesai. Kami memastikan algoritma tersebut **applicable untuk masalah keamanan nyata**.
+Kenapa kombinasi ini **game-changer**? Karena serangan siber terus berevolusi. Signature-based detection selalu **satu langkah di belakang.** Tapi AI bisa mengenali **anomali yang belum pernah dilihat sebelumnya.**
 
 Kenapa Unsupervised Learning? Simple. Dalam security, **labeled attack data itu mahal dan berbahaya untuk dibuat.** Anda tidak bisa minta tim security untuk melakukan serangan DDoS hanya untuk labeling data.
 
 Dengan **Isolation Forest**, model cukup belajar seperti apa traffic "normal". Sisanya — apapun yang menyimpang signifikan — ditandai sebagai anomali. Tidak perlu tahu jenis serangannya apa. Cukup tahu bahwa **ini bukan perilaku normal.**
+
+Inilah kekuatan AI di cybersecurity: **detect the unknown.**
 
 ---
 
