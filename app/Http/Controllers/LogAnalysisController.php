@@ -301,15 +301,18 @@ class LogAnalysisController extends Controller
     /**
      * Mengambil data statistik untuk chart.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getChartData()
+    public function getChartData(Request $request)
     {
-        $chartData = $this->getHourlyChartData();
+        $daysOffset = (int) $request->input('days_offset', 0);
+        $chartData = $this->getHourlyChartData($daysOffset);
 
         return response()->json([
             'success' => true,
             'data' => $chartData,
+            'days_offset' => $daysOffset,
         ]);
     }
 
@@ -557,21 +560,26 @@ class LogAnalysisController extends Controller
     }
 
     /**
-     * Menghasilkan data chart per jam untuk 24 jam terakhir.
+     * Menghasilkan data chart per jam untuk 24 jam.
      * Jika tidak ada data real, akan generate sample data untuk visualisasi.
      *
+     * @param int $daysOffset Offset hari (0 = hari ini, -1 = kemarin, dll)
      * @return array
      */
-    protected function getHourlyChartData(): array
+    protected function getHourlyChartData(int $daysOffset = 0): array
     {
         $labels = [];
         $normalData = [];
         $anomalyData = [];
         $hasRealData = false;
 
-        // Loop 24 jam ke belakang
+        // Base date berdasarkan offset
+        $baseDate = Carbon::now()->addDays($daysOffset);
+        $dateLabel = $daysOffset === 0 ? '24 Jam Terakhir' : $baseDate->format('d M Y');
+
+        // Loop 24 jam
         for ($i = 23; $i >= 0; $i--) {
-            $hour = Carbon::now()->subHours($i);
+            $hour = $baseDate->copy()->subHours($i);
             $labels[] = $hour->format('H:i');
 
             $startHour = $hour->copy()->startOfHour();
@@ -600,12 +608,12 @@ class LogAnalysisController extends Controller
             $anomalyData = [];
             
             // Seed berdasarkan hari agar konsisten dalam 1 hari
-            $daySeed = (int) date('Ymd');
+            $daySeed = (int) $baseDate->format('Ymd');
             mt_srand($daySeed);
             
             for ($i = 0; $i < 24; $i++) {
                 // Pattern: traffic lebih tinggi siang hari (jam 8-18)
-                $hourOfDay = (int) Carbon::now()->subHours(23 - $i)->format('H');
+                $hourOfDay = (int) $baseDate->copy()->subHours(23 - $i)->format('H');
                 $isBusinessHour = ($hourOfDay >= 8 && $hourOfDay <= 18);
                 
                 // Base traffic berdasarkan waktu
@@ -641,6 +649,7 @@ class LogAnalysisController extends Controller
             'labels' => $labels,
             'normal' => $normalData,
             'anomaly' => $anomalyData,
+            'date_label' => $dateLabel,
         ];
     }
 

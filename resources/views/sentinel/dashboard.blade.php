@@ -473,9 +473,22 @@
                 <div class="card-header border-0 align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">
                         <i class="ri-line-chart-line me-2 text-primary"></i>
-                        Traffic Monitoring (24 Jam Terakhir)
+                        Traffic Monitoring
+                        <span class="badge bg-primary-subtle text-primary ms-2" id="chartDateLabel">24 Jam Terakhir</span>
                     </h4>
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 d-flex align-items-center gap-2">
+                        <!-- Date Navigation -->
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-soft-secondary btn-sm" onclick="navigateChart(-1)" title="Hari Sebelumnya">
+                                <i class="ri-arrow-left-s-line"></i>
+                            </button>
+                            <button type="button" class="btn btn-soft-primary btn-sm" onclick="navigateChart(0)" title="Hari Ini">
+                                <i class="ri-calendar-check-line"></i> Hari Ini
+                            </button>
+                            <button type="button" class="btn btn-soft-secondary btn-sm" onclick="navigateChart(1)" title="Hari Berikutnya" id="btnNextDay" disabled>
+                                <i class="ri-arrow-right-s-line"></i>
+                            </button>
+                        </div>
                         <button type="button" class="btn btn-soft-primary btn-sm" onclick="refreshChart()">
                             <i class="ri-refresh-line"></i>
                         </button>
@@ -1012,12 +1025,43 @@
             }, 500);
         }
 
-        // Fungsi Refresh Chart
-        function refreshChart() {
-            fetch('{{ route("api.chart-data") }}')
+        // Chart Navigation State
+        var currentDaysOffset = 0;
+
+        // Fungsi Navigasi Chart (swipe kiri/kanan)
+        function navigateChart(direction) {
+            if (direction === 0) {
+                // Reset ke hari ini
+                currentDaysOffset = 0;
+            } else {
+                currentDaysOffset += direction;
+            }
+            
+            // Jangan bisa ke masa depan
+            if (currentDaysOffset > 0) {
+                currentDaysOffset = 0;
+            }
+            
+            // Update tombol next
+            document.getElementById('btnNextDay').disabled = (currentDaysOffset >= 0);
+            
+            // Fetch data dengan offset
+            fetchChartData(currentDaysOffset);
+        }
+
+        // Fungsi Fetch Chart Data dengan loading
+        function fetchChartData(daysOffset) {
+            const chartContainer = document.querySelector('#trafficChart');
+            chartContainer.style.opacity = '0.5';
+            
+            fetch('{{ route("api.chart-data") }}?days_offset=' + daysOffset)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Update date label
+                        document.getElementById('chartDateLabel').textContent = data.data.date_label;
+                        
+                        // Update chart
                         trafficChart.updateOptions({
                             xaxis: {
                                 categories: data.data.labels
@@ -1027,8 +1071,21 @@
                             { name: 'Normal', data: data.data.normal },
                             { name: 'Anomali', data: data.data.anomaly }
                         ]);
+                        
+                        chartContainer.style.opacity = '1';
                     }
+                })
+                .catch(error => {
+                    console.error('Error fetching chart data:', error);
+                    chartContainer.style.opacity = '1';
                 });
+        }
+
+        // Fungsi Refresh Chart (hari ini)
+        function refreshChart() {
+            currentDaysOffset = 0;
+            document.getElementById('btnNextDay').disabled = true;
+            fetchChartData(0);
         }
 
         // Auto-refresh setiap 30 detik
