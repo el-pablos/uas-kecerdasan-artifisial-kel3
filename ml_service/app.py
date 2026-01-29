@@ -608,9 +608,9 @@ def predict_batch():
 @app.route('/model/info', methods=['GET'])
 def model_info():
     """
-    Endpoint untuk mendapatkan informasi tentang model.
+    Endpoint untuk mendapatkan informasi tentang semua model (v2.0).
     """
-    if model is None:
+    if model is None or ensemble_model is None:
         return jsonify({
             'status': 'error',
             'error': 'Model belum diinisialisasi'
@@ -618,20 +618,42 @@ def model_info():
     
     return jsonify({
         'status': 'success',
-        'model': {
+        'version': '2.0.0',
+        'legacy_model': {
             'algorithm': 'Isolation Forest',
             'n_estimators': model.n_estimators,
             'contamination': model.contamination,
-            'max_samples': str(model.max_samples),
-            'features': [
+            'max_samples': str(model.max_samples)
+        },
+        'ensemble_model': ensemble_model.get_model_info(),
+        'features': {
+            'base_features': [
                 'ip_numeric',
                 'method_encoded', 
                 'status_code',
                 'response_time',
                 'url_length',
                 'user_agent_idx'
+            ],
+            'temporal_features': [
+                'req_count_1min',
+                'req_count_5min',
+                'avg_response_time_1min',
+                'avg_bytes_5min',
+                'error_rate_1min',
+                'error_rate_slope',
+                'unique_urls_1min',
+                'method_entropy',
+                'global_req_count_1min',
+                'global_error_rate_1min'
             ]
         },
+        'capabilities': [
+            'ensemble_voting',
+            'shap_explainability',
+            'temporal_sliding_window',
+            'active_learning_feedback'
+        ],
         'timestamp': datetime.now().isoformat()
     })
 
