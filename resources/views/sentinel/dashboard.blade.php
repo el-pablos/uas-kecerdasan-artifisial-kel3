@@ -625,6 +625,164 @@
         </div>
     </div>
 
+    <!-- ============================================================== -->
+    <!-- XAI: Explainable AI Dashboard - SHAP & Ensemble Section -->
+    <!-- ============================================================== -->
+    <div class="row">
+        <!-- SHAP Feature Importance -->
+        <div class="col-xl-6">
+            <div class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(74, 222, 128, 0.3);">
+                <div class="card-header border-0 align-items-center d-flex" style="border-bottom: 1px solid rgba(74, 222, 128, 0.2) !important;">
+                    <h4 class="card-title mb-0 flex-grow-1" style="color: #4ade80;">
+                        <i class="ri-brain-line me-2"></i>
+                        SHAP Explainability
+                        <span class="badge ms-2" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; font-size: 10px;">XAI</span>
+                    </h4>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="btn btn-sm" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3);" onclick="refreshShapExplanation()">
+                            <i class="ri-refresh-line me-1"></i> Analyze
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="shapFeatureChart" style="height: 280px;"></div>
+                    <div class="mt-3 p-3 rounded" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(74, 222, 128, 0.2);">
+                        <h6 style="color: #4ade80; font-size: 12px; margin-bottom: 10px;">
+                            <i class="ri-lightbulb-line me-1"></i> INTERPRETASI MODEL
+                        </h6>
+                        <p class="small mb-0" style="color: #94a3b8;" id="shapInterpretation">
+                            SHAP (SHapley Additive exPlanations) menunjukkan kontribusi setiap fitur terhadap keputusan model.
+                            Nilai positif mendorong prediksi anomali, nilai negatif mendorong prediksi normal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ensemble Voting Breakdown -->
+        <div class="col-xl-6">
+            <div class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(251, 191, 36, 0.3);">
+                <div class="card-header border-0 align-items-center d-flex" style="border-bottom: 1px solid rgba(251, 191, 36, 0.2) !important;">
+                    <h4 class="card-title mb-0 flex-grow-1" style="color: #fbbf24;">
+                        <i class="ri-group-line me-2"></i>
+                        Ensemble Voting
+                        <span class="badge ms-2" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 10px;">MULTI-MODEL</span>
+                    </h4>
+                    <div class="flex-shrink-0">
+                        <span class="badge" id="ensembleConsensus" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 8px 12px;">
+                            <i class="ri-checkbox-circle-line me-1"></i> CONSENSUS: 100%
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Model Voting Cards -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-4">
+                            <div class="text-center p-3 rounded" id="voteIsolationForest" style="background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3);">
+                                <i class="ri-shield-check-line fs-2" style="color: #4ade80;"></i>
+                                <h6 class="mt-2 mb-1" style="color: #e2e8f0; font-size: 12px;">Isolation Forest</h6>
+                                <span class="badge" style="background: #4ade80; color: #0f172a;">NORMAL</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-3 rounded" id="voteOCSVM" style="background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3);">
+                                <i class="ri-radar-line fs-2" style="color: #4ade80;"></i>
+                                <h6 class="mt-2 mb-1" style="color: #e2e8f0; font-size: 12px;">One-Class SVM</h6>
+                                <span class="badge" style="background: #4ade80; color: #0f172a;">NORMAL</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-3 rounded" id="voteLOF" style="background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3);">
+                                <i class="ri-focus-3-line fs-2" style="color: #4ade80;"></i>
+                                <h6 class="mt-2 mb-1" style="color: #e2e8f0; font-size: 12px;">Local Outlier Factor</h6>
+                                <span class="badge" style="background: #4ade80; color: #0f172a;">NORMAL</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Threat Level Indicator -->
+                    <div class="p-3 rounded" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(251, 191, 36, 0.2);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: #94a3b8; font-size: 12px;">THREAT LEVEL</span>
+                            <span class="badge" id="threatLevelBadge" style="background: #4ade80; color: #0f172a; padding: 6px 12px;">
+                                NORMAL
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 8px; background: rgba(255,255,255,0.1);">
+                            <div class="progress-bar" id="threatLevelBar" role="progressbar" style="width: 15%; background: linear-gradient(90deg, #4ade80, #22c55e);" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2" style="font-size: 10px; color: #64748b;">
+                            <span>NORMAL</span>
+                            <span>SUSPICIOUS</span>
+                            <span>HIGH</span>
+                            <span>CRITICAL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Temporal Sliding Window Stats -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(139, 92, 246, 0.3);">
+                <div class="card-header border-0 align-items-center d-flex" style="border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;">
+                    <h4 class="card-title mb-0 flex-grow-1" style="color: #a78bfa;">
+                        <i class="ri-timer-line me-2"></i>
+                        Temporal Behavioral Analysis
+                        <span class="badge ms-2" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; font-size: 10px;">SLIDING WINDOW</span>
+                    </h4>
+                    <div class="flex-shrink-0">
+                        <span class="badge" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 8px 12px;">
+                            <i class="ri-time-line me-1"></i> Window: 10 menit
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalReqCount">0</h3>
+                                <small style="color: #94a3b8;">Req/Menit</small>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalErrorRate">0%</h3>
+                                <small style="color: #94a3b8;">Error Rate</small>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalUniqueUrls">0</h3>
+                                <small style="color: #94a3b8;">Unique URLs</small>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalMethodEntropy">0.00</h3>
+                                <small style="color: #94a3b8;">Method Entropy</small>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalAvgResponse">0ms</h3>
+                                <small style="color: #94a3b8;">Avg Response</small>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-md-4">
+                            <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <h3 class="mb-1" style="color: #a78bfa;" id="temporalBurstScore">0.0</h3>
+                                <small style="color: #94a3b8;">Burst Score</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Live Cyber Threat Map -->
     <div class="row">
         <div class="col-12">
@@ -891,6 +1049,147 @@
         var distributionChart = new ApexCharts(document.querySelector("#distributionChart"), distributionChartOptions);
         distributionChart.render();
 
+        // ============================================================
+        // SHAP Feature Importance Chart (XAI)
+        // ============================================================
+        var shapChartOptions = {
+            series: [{
+                name: 'SHAP Value',
+                data: [0.35, 0.28, 0.18, 0.12, 0.05, 0.02]
+            }],
+            chart: {
+                type: 'bar',
+                height: 280,
+                toolbar: { show: false },
+                background: 'transparent'
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '60%',
+                    colors: {
+                        ranges: [{
+                            from: -1,
+                            to: 0,
+                            color: '#4ade80'
+                        }, {
+                            from: 0,
+                            to: 1,
+                            color: '#ef4444'
+                        }]
+                    }
+                }
+            },
+            colors: ['#4ade80'],
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) {
+                    return val.toFixed(3);
+                },
+                style: {
+                    colors: ['#e2e8f0']
+                }
+            },
+            xaxis: {
+                categories: ['request_count', 'error_rate', 'response_time', 'unique_urls', 'method_entropy', 'burst_score'],
+                labels: {
+                    style: { colors: '#94a3b8' }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#94a3b8' }
+                }
+            },
+            grid: {
+                borderColor: 'rgba(148, 163, 184, 0.1)'
+            },
+            tooltip: {
+                theme: 'dark'
+            }
+        };
+
+        var shapChart = new ApexCharts(document.querySelector("#shapFeatureChart"), shapChartOptions);
+        shapChart.render();
+
+        // Fungsi refresh SHAP dari ML Service
+        function refreshShapExplanation() {
+            // Sample data - bisa diambil dari API /predict/explain
+            const sampleFeatures = [1.2, 0.5, 180, 404, 12, 3];
+            
+            fetch('http://localhost:5000/predict/explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ features: sampleFeatures })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.shap_values && data.feature_names) {
+                    // Update chart dengan SHAP values dari response
+                    shapChart.updateOptions({
+                        xaxis: { categories: data.feature_names }
+                    });
+                    shapChart.updateSeries([{
+                        name: 'SHAP Value',
+                        data: data.shap_values
+                    }]);
+                    
+                    // Update interpretasi
+                    document.getElementById('shapInterpretation').innerHTML = 
+                        `<strong>Top contributor:</strong> ${data.top_contributor || 'request_count'} ` +
+                        `dengan kontribusi ${(Math.abs(data.shap_values[0]) * 100).toFixed(1)}% terhadap keputusan model.`;
+                }
+            })
+            .catch(err => {
+                console.log('ML Service not available, using demo data');
+            });
+        }
+
+        // Fungsi update Ensemble Voting display
+        function updateEnsembleVoting(predictions) {
+            const voteColors = {
+                normal: { bg: 'rgba(74, 222, 128, 0.1)', border: 'rgba(74, 222, 128, 0.3)', icon: '#4ade80', badge: '#4ade80' },
+                anomaly: { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', icon: '#ef4444', badge: '#ef4444' }
+            };
+            
+            const models = ['IsolationForest', 'OCSVM', 'LOF'];
+            const elementIds = ['voteIsolationForest', 'voteOCSVM', 'voteLOF'];
+            
+            models.forEach((model, idx) => {
+                const prediction = predictions[model] || 'normal';
+                const colors = voteColors[prediction === -1 ? 'anomaly' : 'normal'];
+                const el = document.getElementById(elementIds[idx]);
+                
+                el.style.background = colors.bg;
+                el.style.borderColor = colors.border;
+                el.querySelector('i').style.color = colors.icon;
+                
+                const badge = el.querySelector('.badge');
+                badge.style.background = colors.badge;
+                badge.textContent = prediction === -1 ? 'ANOMALY' : 'NORMAL';
+            });
+        }
+
+        // Update Threat Level Bar
+        function updateThreatLevel(level) {
+            const levels = {
+                'NORMAL': { width: '15%', color: '#4ade80', bg: 'linear-gradient(90deg, #4ade80, #22c55e)' },
+                'SUSPICIOUS': { width: '40%', color: '#fbbf24', bg: 'linear-gradient(90deg, #fbbf24, #f59e0b)' },
+                'HIGH': { width: '70%', color: '#f97316', bg: 'linear-gradient(90deg, #f97316, #ea580c)' },
+                'CRITICAL': { width: '100%', color: '#ef4444', bg: 'linear-gradient(90deg, #ef4444, #dc2626)' }
+            };
+            
+            const config = levels[level] || levels['NORMAL'];
+            const bar = document.getElementById('threatLevelBar');
+            const badge = document.getElementById('threatLevelBadge');
+            
+            bar.style.width = config.width;
+            bar.style.background = config.bg;
+            badge.textContent = level;
+            badge.style.background = config.color;
+        }
+
         // Attack Type Names untuk display
         const attackTypeNames = {
             'ddos': 'DDoS Attack',
@@ -899,6 +1198,7 @@
             'path_traversal': 'Path Traversal',
             'random': 'Random Mixed Attack'
         };
+
 
         // Fungsi Simulasi Serangan dengan Fluid Animation
         function simulateAttack(attackType) {
