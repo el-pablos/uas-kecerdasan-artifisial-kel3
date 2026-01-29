@@ -379,19 +379,25 @@ def calculate_severity_score(log_data, prediction, anomaly_score):
 
 
 # ========================================
-# ENDPOINT API
+# ENDPOINT API (v2.0 - Journal Grade)
 # ========================================
 
 @app.route('/', methods=['GET'])
 def index():
     """
-    Endpoint root untuk health check.
+    Endpoint root untuk health check dan info service.
     """
     return jsonify({
         'status': 'active',
         'service': 'Log Sentinel ML Service',
-        'version': '1.0.0',
-        'algorithm': 'Isolation Forest',
+        'version': '2.0.0',
+        'framework': 'Hybrid Adaptive Anomaly Detection with XAI',
+        'algorithms': {
+            'primary': 'Ensemble Voting (IF + OCSVM + LOF)',
+            'explainability': 'SHAP TreeExplainer',
+            'feature_engineering': 'Temporal Sliding Window'
+        },
+        'author': 'Muhammad Akbar Hadi Pratama (@el-pablos)',
         'timestamp': datetime.now().isoformat()
     })
 
