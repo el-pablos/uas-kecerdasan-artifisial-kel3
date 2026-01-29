@@ -1,9 +1,17 @@
 {
-    "name": "laravel/laravel",
+    "name": "el-pablos/log-sentinel",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "description": "Log Sentinel v2.0 - Hybrid Adaptive Anomaly Detection Framework with Explainable AI & Real-Time Forensic Visualization",
+    "keywords": ["anomaly-detection", "machine-learning", "cybersecurity", "explainable-ai", "shap", "laravel", "ensemble-learning"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhammad Akbar Hadi Pratama",
+            "email": "akbar.pratama@mhs.unj.ac.id",
+            "homepage": "https://github.com/el-pablos",
+            "role": "Lead Researcher & Developer"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "guzzlehttp/guzzle": "^7.2",
