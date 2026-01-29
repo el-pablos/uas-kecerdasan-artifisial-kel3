@@ -9,28 +9,80 @@
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![Build](https://img.shields.io/badge/Build-Passing-4caf50?style=for-the-badge&logo=github-actions&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-39%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 **Hybrid Adaptive Anomaly Detection Framework with Explainable AI & Real-Time Forensic Visualization**
 
 *Research Project - Artificial Intelligence Course*  
 *State University of Jakarta (Universitas Negeri Jakarta)*
 
-[Live Demo](#-screenshot-aplikasi) • [Installation](#-panduan-instalasi) • [API Docs](#-api-endpoints) • [Research Team](#-tim-pengembang)
+[Live Demo](#-screenshot-aplikasi) • [Installation](#-installation-guide) • [API Docs](#-api-endpoints) • [Citation](#-citation)
 
 </div>
 
 ---
 
-## 🔬 Research Abstract
+## 📄 Abstract
 
-This research presents **Log Sentinel v2.0**, a hybrid adaptive framework for server log anomaly detection that addresses the limitations of single-model approaches in cybersecurity threat identification. The framework integrates three complementary unsupervised learning algorithms—**Isolation Forest**, **One-Class SVM**, and **Local Outlier Factor**—through an ensemble voting mechanism to achieve robust multi-perspective anomaly detection. 
+Server log anomaly detection is a critical component of modern cybersecurity infrastructure. Traditional single-model approaches, while computationally efficient, suffer from high false positive rates and limited interpretability. This research presents **Log Sentinel v2.0**, a hybrid adaptive framework that addresses these limitations through three key contributions:
 
-Key innovations include:
-- **SHAP-based Explainable AI (XAI)** for transparent model decision interpretation
-- **Temporal Sliding Window** for behavioral context-aware detection
-- **Real-time forensic visualization** with interactive threat mapping
+1. **Multi-Model Ensemble Architecture**: Integration of Isolation Forest (IF), One-Class Support Vector Machine (OCSVM), and Local Outlier Factor (LOF) through a weighted majority voting mechanism, reducing single-model bias and improving detection robustness.
 
-The system demonstrates improved detection accuracy and reduced false positive rates compared to standalone Isolation Forest implementations.
+2. **SHAP-based Explainable AI (XAI)**: Implementation of SHapley Additive exPlanations using TreeExplainer to provide transparent, interpretable feature contribution analysis for each anomaly prediction.
+
+3. **Temporal Sliding Window**: A 10-minute behavioral context window with 10 engineered temporal features (request frequency, error rate slope, method entropy, etc.) to capture time-series patterns missed by point-in-time analysis.
+
+**Keywords**: Anomaly Detection, Ensemble Learning, Explainable AI, SHAP, Isolation Forest, Cybersecurity, Server Log Analysis
+
+---
+
+## 🔬 Methodology
+
+### 2.1 Ensemble Voting Mechanism
+
+The framework employs three complementary unsupervised learning algorithms:
+
+| Algorithm | Strength | Weakness Addressed |
+|-----------|----------|-------------------|
+| **Isolation Forest** | Efficient for high-dimensional data | Poor on clustered anomalies |
+| **One-Class SVM** | Robust boundary detection | Sensitive to kernel selection |
+| **Local Outlier Factor** | Density-based local detection | Computationally expensive |
+
+Final prediction is determined by weighted majority voting:
+
+$$P_{final} = \begin{cases} \text{ANOMALY} & \text{if } \sum_{i=1}^{3} w_i \cdot p_i \geq \theta \\ \text{NORMAL} & \text{otherwise} \end{cases}$$
+
+Where $w_i$ represents model weights and $\theta$ is the decision threshold.
+
+### 2.2 Temporal Feature Engineering
+
+The sliding window module extracts 10 behavioral features:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                 10-Minute Sliding Window                 │
+├─────────────────────────────────────────────────────────┤
+│ 1. req_count_1min      │ Request count per IP (1 min)   │
+│ 2. req_count_5min      │ Request count per IP (5 min)   │
+│ 3. error_rate_1min     │ Error response ratio           │
+│ 4. error_rate_slope    │ Error rate trend               │
+│ 5. avg_response_time   │ Mean response latency          │
+│ 6. unique_urls_1min    │ URL diversity metric           │
+│ 7. method_entropy      │ HTTP method distribution       │
+│ 8. global_req_count    │ Total system load              │
+│ 9. global_error_rate   │ System-wide error ratio        │
+│ 10. burst_score        │ Request spike indicator        │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 2.3 SHAP Explainability
+
+Feature contributions are calculated using TreeExplainer:
+
+$$\phi_i = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|!(|N|-|S|-1)!}{|N|!} [f(S \cup \{i\}) - f(S)]$$
+
+This provides human-readable explanations like:
+> "Request flagged as ANOMALY due to: high request_count (+0.45), abnormal error_rate (+0.32), suspicious method_entropy (+0.18)"
 
 ---
 
