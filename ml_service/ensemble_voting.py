@@ -19,11 +19,17 @@ Consensus Logic:
 - SUSPICIOUS (Kuning): 1 model detect anomaly
 - NORMAL (Hijau): Tidak ada model detect anomaly
 
-Tim Pengembang:
-- JEREMY CHRISTO EMMANUELLE PANJAITAN (237006516084)
-- MUHAMMAD AKBAR HADI PRATAMA (237006516058)
-- FARREL ALFARIDZI (237006516028)
-- CHOSMAS LAURENS RUMNGEWUR (217006516074)
+========================================
+Lead Researcher & Developer (Journal-Grade Overhaul):
+  MUHAMMAD AKBAR HADI PRATAMA
+  GitHub: @el-pablos
+  Email: yeteprem.end23juni@gmail.com
+
+Original Contributors / Legacy Team:
+  - Jeremy Christo Emmanuelle Panjaitan (237006516084)
+  - Farrel Alfaridzi (237006516028)
+  - Chosmas Laurens Rumngewur (217006516074)
+========================================
 """
 
 import numpy as np
