@@ -827,6 +827,342 @@ def visualize_pca():
 
 
 # ========================================
+# NEW ENDPOINTS v2.0 - JOURNAL GRADE
+# ========================================
+
+@app.route('/predict/ensemble', methods=['POST'])
+def predict_ensemble():
+    """
+    Endpoint untuk prediksi menggunakan Ensemble Voting.
+    Menggabungkan Isolation Forest, OCSVM, dan LOF.
+    
+    Request Body (JSON):
+        - ip_address, method, url, status_code, user_agent, response_time
+    
+    Response (JSON):
+        - threat_level: 'normal', 'suspicious', 'high', 'critical'
+        - consensus_score: Float (0-1)
+        - voting_breakdown: Hasil voting per model
+        - explanation: Penjelasan human-readable
+    """
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Request harus dalam format JSON', 'status': 'error'}), 400
+        
+        log_data = request.get_json()
+        
+        # Validasi field
+        required_fields = ['ip_address', 'method', 'url', 'status_code']
+        for field in required_fields:
+            if field not in log_data:
+                return jsonify({'error': f'Field {field} diperlukan', 'status': 'error'}), 400
+        
+        # Check whitelist
+        if log_data.get('ip_address') in feedback_storage['whitelist_ips']:
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'threat_level': 'normal',
+                    'consensus_score': 0.0,
+                    'whitelisted': True,
+                    'explanation': 'IP address ada dalam whitelist, dilewati dari deteksi.'
+                },
+                'timestamp': datetime.now().isoformat()
+            })
+        
+        # Preprocessing
+        fitur = preprocess_log_data(log_data)
+        
+        # Tambah ke sliding window dan dapatkan temporal features
+        temporal_features = sliding_window.extract_temporal_features(log_data)
+        
+        # Prediksi dengan ensemble
+        with model_lock:
+            result = ensemble_model.predict(fitur)
+        
+        # Map threat level ke severity score
+        severity_map = {
+            ThreatLevel.NORMAL: 0,
+            ThreatLevel.SUSPICIOUS: 40,
+            ThreatLevel.HIGH: 70,
+            ThreatLevel.CRITICAL: 95
+        }
+        
+        # Format response
+        response = {
+            'status': 'success',
+            'data': {
+                'threat_level': result.threat_level.value,
+                'consensus_score': result.consensus_score,
+                'severity_score': severity_map.get(result.threat_level, 50),
+                'voting_breakdown': {
+                    name: 'anomaly' if voted else 'normal'
+                    for name, voted in result.voting_breakdown.items()
+                },
+                'individual_predictions': [
+                    {
+                        'model': pred.model_name,
+                        'prediction': 'anomaly' if pred.prediction == -1 else 'normal',
+                        'confidence': pred.confidence,
+                        'score': round(pred.score, 4)
+                    }
+                    for pred in result.individual_predictions
+                ],
+                'explanation': result.explanation,
+                'temporal_context': temporal_features
+            },
+            'input_data': {
+                'ip_address': log_data.get('ip_address'),
+                'method': log_data.get('method'),
+                'url': log_data.get('url'),
+                'status_code': log_data.get('status_code')
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Log dengan warna
+        threat_icons = {
+            'normal': '✅',
+            'suspicious': '⚠️',
+            'high': '🔶',
+            'critical': '🚨'
+        }
+        icon = threat_icons.get(result.threat_level.value, '❓')
+        print(f"{icon} Ensemble: {result.threat_level.value.upper()} | Score: {result.consensus_score:.2f} | IP: {log_data.get('ip_address')}")
+        
+        return jsonify(response)
+    
+    except Exception as e:
+        print(f"[ERROR] Ensemble prediction error: {str(e)}")
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/predict/explain', methods=['POST'])
+def predict_explain():
+    """
+    Endpoint untuk prediksi dengan SHAP explanation.
+    Menjelaskan kontribusi setiap fitur terhadap keputusan model.
+    
+    Request Body (JSON):
+        - ip_address, method, url, status_code, user_agent, response_time
+    
+    Response (JSON):
+        - prediction: 'normal' atau 'anomaly'
+        - explanation_text: Penjelasan human-readable
+        - shap_contributions: Kontribusi setiap fitur
+        - top_contributors: Top 3 fitur paling berpengaruh
+    """
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Request harus dalam format JSON', 'status': 'error'}), 400
+        
+        log_data = request.get_json()
+        
+        # Validasi
+        required_fields = ['ip_address', 'method', 'url', 'status_code']
+        for field in required_fields:
+            if field not in log_data:
+                return jsonify({'error': f'Field {field} diperlukan', 'status': 'error'}), 400
+        
+        # Preprocessing
+        fitur = preprocess_log_data(log_data)
+        
+        # Prediksi dengan legacy model (untuk SHAP)
+        prediction = model.predict(fitur)[0]
+        
+        # Generate SHAP explanation
+        with model_lock:
+            explanation = shap_explainer.generate_explanation(fitur, prediction, log_data)
+        
+        # Calculate severity
+        anomaly_score = model.decision_function(fitur)[0]
+        severity_score = calculate_severity_score(log_data, prediction, anomaly_score)
+        
+        response = {
+            'status': 'success',
+            'data': {
+                'prediction': explanation['prediction'],
+                'prediction_code': explanation['prediction_code'],
+                'severity_score': round(severity_score, 2),
+                'explanation_text': explanation['explanation_text'],
+                'base_value': explanation['base_value'],
+                'total_shap_contribution': explanation['total_shap_contribution'],
+                'top_contributors': explanation['top_contributors'],
+                'all_contributions': explanation['all_contributions'],
+                'feature_importance_ranking': explanation['feature_importance_ranking']
+            },
+            'input_data': {
+                'ip_address': log_data.get('ip_address'),
+                'method': log_data.get('method'),
+                'url': log_data.get('url'),
+                'status_code': log_data.get('status_code')
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        print(f"🔍 SHAP Explain: {explanation['prediction'].upper()} | Top: {explanation['feature_importance_ranking'][:3]}")
+        
+        return jsonify(response)
+    
+    except Exception as e:
+        print(f"[ERROR] SHAP explanation error: {str(e)}")
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/feedback', methods=['POST'])
+def submit_feedback():
+    """
+    Endpoint untuk Active Learning - Human-in-the-Loop feedback.
+    Admin bisa menandai false positive/negative untuk re-training.
+    
+    Request Body (JSON):
+        - log_id: ID dari log yang di-feedback
+        - ip_address: IP address terkait
+        - actual_label: 'normal' atau 'anomaly' (label yang benar menurut admin)
+        - predicted_label: Label yang diprediksi model
+        - feedback_type: 'false_positive', 'false_negative', 'correct'
+        - add_to_whitelist: Boolean (optional)
+        - notes: String catatan admin (optional)
+    
+    Response (JSON):
+        - status: success/error
+        - feedback_id: ID feedback yang disimpan
+    """
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Request harus dalam format JSON', 'status': 'error'}), 400
+        
+        data = request.get_json()
+        
+        # Validasi
+        required = ['log_id', 'actual_label', 'predicted_label', 'feedback_type']
+        for field in required:
+            if field not in data:
+                return jsonify({'error': f'Field {field} diperlukan', 'status': 'error'}), 400
+        
+        feedback_entry = {
+            'id': len(feedback_storage['user_corrections']) + 1,
+            'log_id': data['log_id'],
+            'ip_address': data.get('ip_address', ''),
+            'actual_label': data['actual_label'],
+            'predicted_label': data['predicted_label'],
+            'feedback_type': data['feedback_type'],
+            'notes': data.get('notes', ''),
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Simpan feedback
+        feedback_storage['user_corrections'].append(feedback_entry)
+        
+        # Handle false positive/negative
+        if data['feedback_type'] == 'false_positive':
+            feedback_storage['false_positives'].append(feedback_entry)
+        elif data['feedback_type'] == 'false_negative':
+            feedback_storage['false_negatives'].append(feedback_entry)
+        
+        # Add to whitelist if requested
+        if data.get('add_to_whitelist') and data.get('ip_address'):
+            feedback_storage['whitelist_ips'].add(data['ip_address'])
+            print(f"✅ IP {data['ip_address']} ditambahkan ke whitelist")
+        
+        print(f"📝 Feedback #{feedback_entry['id']}: {data['feedback_type']} | Log #{data['log_id']}")
+        
+        return jsonify({
+            'status': 'success',
+            'feedback_id': feedback_entry['id'],
+            'message': 'Feedback berhasil disimpan untuk re-training',
+            'whitelist_count': len(feedback_storage['whitelist_ips']),
+            'total_corrections': len(feedback_storage['user_corrections']),
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Feedback error: {str(e)}")
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/feedback/stats', methods=['GET'])
+def feedback_stats():
+    """
+    Endpoint untuk melihat statistik feedback Active Learning.
+    """
+    return jsonify({
+        'status': 'success',
+        'statistics': {
+            'total_corrections': len(feedback_storage['user_corrections']),
+            'false_positives': len(feedback_storage['false_positives']),
+            'false_negatives': len(feedback_storage['false_negatives']),
+            'whitelist_ips_count': len(feedback_storage['whitelist_ips']),
+            'whitelist_patterns_count': len(feedback_storage['whitelist_patterns'])
+        },
+        'whitelist_ips': list(feedback_storage['whitelist_ips']),
+        'recent_corrections': feedback_storage['user_corrections'][-10:],  # Last 10
+        'timestamp': datetime.now().isoformat()
+    })
+
+
+@app.route('/whitelist', methods=['POST'])
+def manage_whitelist():
+    """
+    Endpoint untuk mengelola whitelist IP/pattern.
+    
+    Request Body (JSON):
+        - action: 'add' atau 'remove'
+        - ip_address: IP address (optional)
+        - pattern: URL pattern (optional)
+    """
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Request harus dalam format JSON', 'status': 'error'}), 400
+        
+        data = request.get_json()
+        action = data.get('action', 'add')
+        
+        if action == 'add':
+            if data.get('ip_address'):
+                feedback_storage['whitelist_ips'].add(data['ip_address'])
+                print(f"✅ Whitelist ADD IP: {data['ip_address']}")
+            if data.get('pattern'):
+                feedback_storage['whitelist_patterns'].append(data['pattern'])
+                print(f"✅ Whitelist ADD Pattern: {data['pattern']}")
+        
+        elif action == 'remove':
+            if data.get('ip_address'):
+                feedback_storage['whitelist_ips'].discard(data['ip_address'])
+                print(f"❌ Whitelist REMOVE IP: {data['ip_address']}")
+            if data.get('pattern') and data['pattern'] in feedback_storage['whitelist_patterns']:
+                feedback_storage['whitelist_patterns'].remove(data['pattern'])
+                print(f"❌ Whitelist REMOVE Pattern: {data['pattern']}")
+        
+        return jsonify({
+            'status': 'success',
+            'action': action,
+            'whitelist_ips': list(feedback_storage['whitelist_ips']),
+            'whitelist_patterns': feedback_storage['whitelist_patterns'],
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Whitelist error: {str(e)}")
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/temporal/stats', methods=['GET'])
+def temporal_stats():
+    """
+    Endpoint untuk mendapatkan statistik sliding window.
+    """
+    if sliding_window is None:
+        return jsonify({'status': 'error', 'error': 'Sliding window not initialized'}), 500
+    
+    return jsonify({
+        'status': 'success',
+        'sliding_window': sliding_window.get_stats(),
+        'timestamp': datetime.now().isoformat()
+    })
+
+
+# ========================================
 # MAIN ENTRY POINT
 # ========================================
 
