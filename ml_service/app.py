@@ -405,13 +405,30 @@ def index():
 @app.route('/health', methods=['GET'])
 def health_check():
     """
-    Endpoint untuk memeriksa status kesehatan service.
+    Endpoint untuk memeriksa status kesehatan service (v2.0).
     """
-    model_status = 'ready' if model is not None else 'not_initialized'
+    legacy_status = 'ready' if model is not None else 'not_initialized'
+    ensemble_status = 'ready' if ensemble_model is not None and ensemble_model.is_fitted else 'not_initialized'
+    shap_status = 'ready' if shap_explainer is not None else 'not_initialized'
+    sliding_window_status = 'ready' if sliding_window is not None else 'not_initialized'
+    
+    all_ready = all([
+        legacy_status == 'ready',
+        ensemble_status == 'ready',
+        shap_status == 'ready',
+        sliding_window_status == 'ready'
+    ])
     
     return jsonify({
-        'status': 'healthy',
-        'model_status': model_status,
+        'status': 'healthy' if all_ready else 'degraded',
+        'version': '2.0.0',
+        'components': {
+            'legacy_isolation_forest': legacy_status,
+            'ensemble_voting': ensemble_status,
+            'shap_explainer': shap_status,
+            'sliding_window': sliding_window_status
+        },
+        'sliding_window_stats': sliding_window.get_stats() if sliding_window else None,
         'timestamp': datetime.now().isoformat()
     })
 
