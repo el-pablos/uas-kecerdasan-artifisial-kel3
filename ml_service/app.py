@@ -55,12 +55,26 @@ import os
 from datetime import datetime
 import base64
 from io import BytesIO
+import json
+import threading
 
 # Import untuk visualisasi
 import matplotlib
 matplotlib.use('Agg')  # Backend non-interactive untuk server
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+# ========================================
+# IMPORT MODUL INTERNAL (Journal-Grade)
+# ========================================
+from temporal_features import TemporalSlidingWindow, get_sliding_window
+from shap_explainer import SHAPExplainer, create_shap_explainer
+from ensemble_voting import (
+    EnsembleVotingClassifier, 
+    create_ensemble_classifier,
+    ThreatLevel,
+    EnsembleResult
+)
 
 # Inisialisasi aplikasi Flask
 app = Flask(__name__)
