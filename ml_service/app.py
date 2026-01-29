@@ -81,14 +81,29 @@ app = Flask(__name__)
 CORS(app)  # Mengizinkan Cross-Origin Request dari Laravel
 
 # ========================================
-# KONFIGURASI MODEL MACHINE LEARNING
+# KONFIGURASI MODEL MACHINE LEARNING (v2.0)
 # ========================================
 
 # Variabel global untuk menyimpan model dan encoder
-model = None
+model = None                    # Legacy: Single Isolation Forest
+ensemble_model = None           # NEW: Ensemble Voting Classifier
+shap_explainer = None           # NEW: SHAP Explainer untuk XAI
 label_encoders = {}
-pca_model = None  # PCA untuk reduksi dimensi
-log_history = []  # Menyimpan history log untuk visualisasi
+pca_model = None                # PCA untuk reduksi dimensi
+sliding_window = None           # NEW: Temporal Sliding Window
+log_history = []                # Menyimpan history log untuk visualisasi
+
+# NEW: Feedback storage untuk Active Learning
+feedback_storage = {
+    'whitelist_ips': set(),
+    'whitelist_patterns': [],
+    'false_positives': [],
+    'false_negatives': [],
+    'user_corrections': []
+}
+
+# Lock untuk thread-safety
+model_lock = threading.Lock()
 
 # Daftar HTTP methods yang dikenali sistem
 HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
