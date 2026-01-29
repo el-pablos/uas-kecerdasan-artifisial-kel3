@@ -1,22 +1,44 @@
 # ========================================
-# Log Sentinel - Machine Learning Service
-# Dependencies untuk Anomaly Detection System
+# Log Sentinel - Hybrid Adaptive Anomaly Detection Framework
+# Dependencies untuk Advanced ML-based Cybersecurity System
+# ========================================
+# Paper Reference: "Enhancing Interpretability of Isolation Forest 
+# in Web Server Attack Detection using SHAP Values"
 # ========================================
 
 # Framework Web
 Flask==3.0.0
 flask-cors==4.0.0
 
-# Machine Learning & Data Science
+# Machine Learning & Data Science Core
 scikit-learn>=1.3.0
 numpy>=1.24.0
 pandas>=2.0.0
 joblib>=1.3.0
 
-# Visualisasi untuk Explainable AI
+# ========================================
+# EXPLAINABLE AI (XAI) - SHAP Integration
+# Untuk interpretabilitas model Isolation Forest
+# ========================================
+shap>=0.44.0
+
+# ========================================
+# VISUALISASI INTERAKTIF
+# Upgrade dari static Matplotlib ke interactive Plotly
+# ========================================
 matplotlib>=3.7.0
 seaborn>=0.12.0
+plotly>=5.18.0
 
-# Utilities
+# ========================================
+# UTILITIES & RUNTIME
+# ========================================
 python-dotenv==1.0.0
 gunicorn==21.2.0
+
+# ========================================
+# TESTING FRAMEWORK
+# Untuk validasi dan quality assurance
+# ========================================
+pytest>=7.4.0
+pytest-cov>=4.1.0
