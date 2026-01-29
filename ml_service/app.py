@@ -1,21 +1,46 @@
 """
-========================================
-Log Sentinel - Machine Learning Service
-Sistem Deteksi Anomali menggunakan Isolation Forest
-========================================
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     LOG SENTINEL - ML SERVICE v2.0                            ║
+║         Hybrid Adaptive Anomaly Detection Framework with XAI                  ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Research Paper: "Enhancing Interpretability of Isolation Forest in          ║
+║  Web Server Attack Detection using SHAP Values & Ensemble Voting"            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Microservice ini bertanggung jawab untuk:
-1. Menerima data log server dari Laravel Backend
-2. Melakukan preprocessing dan encoding data
-3. Mendeteksi anomali menggunakan algoritma Isolation Forest
-4. Mengembalikan hasil prediksi ke Laravel
-5. Menghasilkan visualisasi PCA untuk Explainable AI
+Microservice ini mengimplementasikan framework deteksi anomali tingkat lanjut:
 
-Tim Pengembang:
-- JEREMY CHRISTO EMMANUELLE PANJAITAN (237006516084)
-- MUHAMMAD AKBAR HADI PRATAMA (237006516058)
-- FARREL ALFARIDZI (237006516028)
-- CHOSMAS LAURENS RUMNGEWUR (217006516074)
+1. ENSEMBLE VOTING MECHANISM
+   - Isolation Forest (Tree-based isolation)
+   - One-Class SVM (Kernel-based boundary detection)  
+   - Local Outlier Factor (Density-based anomaly detection)
+   - Consensus voting untuk mengurangi bias algoritma tunggal
+
+2. EXPLAINABLE AI (XAI) dengan SHAP
+   - SHapley Additive exPlanations untuk interpretabilitas model
+   - Kontribusi setiap fitur terhadap keputusan model
+   - Human-readable explanation untuk setiap prediksi
+
+3. TEMPORAL SLIDING WINDOW
+   - Feature engineering berbasis waktu (behavioral context)
+   - Deteksi DDoS, Brute Force dengan analisis temporal
+   - Request frequency, error rate trend, method entropy
+
+4. ACTIVE LEARNING / HUMAN-IN-THE-LOOP
+   - Feedback mechanism untuk false positive/negative
+   - Whitelist management untuk IP/pattern yang dikecualikan
+   - Adaptive re-training berdasarkan feedback admin
+
+================================================================================
+Lead Researcher & Developer (Journal-Grade Overhaul):
+  MUHAMMAD AKBAR HADI PRATAMA
+  GitHub: @el-pablos
+  Email: yeteprem.end23juni@gmail.com
+
+Original Contributors / Legacy Team:
+  - Jeremy Christo Emmanuelle Panjaitan (237006516084)
+  - Farrel Alfaridzi (237006516028)
+  - Chosmas Laurens Rumngewur (217006516074)
+================================================================================
 """
 
 from flask import Flask, request, jsonify
