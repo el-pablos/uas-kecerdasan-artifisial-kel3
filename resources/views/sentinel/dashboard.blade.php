@@ -1190,6 +1190,79 @@
             badge.style.background = config.color;
         }
 
+        // ============================================================
+        // FLASK ML SERVICE INTEGRATION
+        // Koneksi real-time ke Python backend
+        // ============================================================
+        
+        const ML_SERVICE_URL = '{{ env("ML_SERVICE_URL", "http://127.0.0.1:5000") }}';
+
+        // Fetch Ensemble Prediction dari Flask
+        function fetchEnsemblePrediction(features = null) {
+            const sampleFeatures = features || [1.2, 0.5, 180, 404, 12, 3];
+            
+            fetch(`${ML_SERVICE_URL}/predict/ensemble`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ features: sampleFeatures })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.voting_breakdown) {
+                    // Update voting cards
+                    updateEnsembleVoting(data.voting_breakdown.individual_predictions);
+                    
+                    // Update consensus score
+                    const consensus = document.getElementById('ensembleConsensus');
+                    consensus.innerHTML = `<i class="ri-checkbox-circle-line me-1"></i> CONSENSUS: ${(data.voting_breakdown.consensus_score * 100).toFixed(0)}%`;
+                    
+                    // Update threat level
+                    updateThreatLevel(data.threat_level || 'NORMAL');
+                }
+            })
+            .catch(err => {
+                console.log('ML Service ensemble endpoint not available:', err);
+            });
+        }
+
+        // Fetch Temporal Stats dari Flask
+        function fetchTemporalStats() {
+            fetch(`${ML_SERVICE_URL}/temporal/stats`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.stats) {
+                    document.getElementById('temporalReqCount').textContent = data.stats.logs_1min || 0;
+                    document.getElementById('temporalErrorRate').textContent = '0%';
+                    document.getElementById('temporalUniqueUrls').textContent = data.stats.logs_5min || 0;
+                    document.getElementById('temporalMethodEntropy').textContent = '0.00';
+                    document.getElementById('temporalAvgResponse').textContent = '0ms';
+                    document.getElementById('temporalBurstScore').textContent = '0.0';
+                }
+            })
+            .catch(err => {
+                console.log('ML Service temporal endpoint not available:', err);
+            });
+        }
+
+        // Auto-refresh XAI data setiap 30 detik
+        function initXAIAutoRefresh() {
+            // Initial fetch
+            refreshShapExplanation();
+            fetchEnsemblePrediction();
+            fetchTemporalStats();
+            
+            // Auto refresh setiap 30 detik
+            setInterval(() => {
+                fetchEnsemblePrediction();
+                fetchTemporalStats();
+            }, 30000);
+        }
+
+        // Initialize XAI on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initXAIAutoRefresh();
+        });
+
         // Attack Type Names untuk display
         const attackTypeNames = {
             'ddos': 'DDoS Attack',
