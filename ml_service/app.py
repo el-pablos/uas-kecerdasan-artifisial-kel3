@@ -164,18 +164,26 @@ def generate_training_data():
 
 def initialize_model():
     """
-    Menginisialisasi dan melatih model Isolation Forest serta PCA.
-    Model dilatih dengan data dummy normal saat startup.
+    Menginisialisasi dan melatih semua model ML:
+    1. Legacy Isolation Forest (backward compatibility)
+    2. Ensemble Voting Classifier (IF + OCSVM + LOF)
+    3. SHAP Explainer untuk Explainable AI
+    4. PCA untuk visualisasi
+    5. Temporal Sliding Window
     """
-    global model, label_encoders, pca_model
+    global model, ensemble_model, shap_explainer, label_encoders, pca_model, sliding_window
     
-    print("[INFO] Memulai inisialisasi model Isolation Forest...")
+    print("\n" + "="*60)
+    print("  LOG SENTINEL - INITIALIZING ML MODELS v2.0")
+    print("  Hybrid Adaptive Anomaly Detection Framework")
+    print("="*60)
     
     # Inisialisasi Label Encoders untuk data kategorikal
     label_encoders['method'] = LabelEncoder()
     label_encoders['method'].fit(HTTP_METHODS)
     
     # Generate data training
+    print("\n[STEP 1/6] Generating training data...")
     data_training = generate_training_data()
     
     # Encode kolom method
@@ -191,26 +199,55 @@ def initialize_model():
         'user_agent_idx'
     ]].values
     
-    # Inisialisasi dan latih model Isolation Forest
-    # contamination=0.1 berarti kita mengharapkan 10% data adalah anomali
+    # ========================================
+    # LEGACY MODEL: Isolation Forest
+    # ========================================
+    print("[STEP 2/6] Training Legacy Isolation Forest...")
     model = IsolationForest(
-        n_estimators=100,          # Jumlah pohon dalam forest
-        contamination=0.1,         # Proporsi outlier dalam data
-        max_samples='auto',        # Jumlah sampel untuk melatih setiap pohon
-        random_state=42,           # Untuk reproducibility
-        n_jobs=-1                  # Gunakan semua CPU cores
+        n_estimators=100,
+        contamination=0.1,
+        max_samples='auto',
+        random_state=42,
+        n_jobs=-1
     )
-    
-    # Latih model dengan data normal
     model.fit(fitur_training)
+    print("  ✓ Isolation Forest trained successfully")
     
-    # Inisialisasi PCA untuk reduksi dimensi (6 fitur -> 2 dimensi)
+    # ========================================
+    # NEW: Ensemble Voting Classifier
+    # ========================================
+    print("[STEP 3/6] Training Ensemble Voting Classifier...")
+    ensemble_model = create_ensemble_classifier(contamination=0.1, random_state=42)
+    ensemble_model.fit(fitur_training)
+    print("  ✓ Ensemble (IF + OCSVM + LOF) trained successfully")
+    
+    # ========================================
+    # NEW: SHAP Explainer
+    # ========================================
+    print("[STEP 4/6] Initializing SHAP Explainer...")
+    shap_explainer = create_shap_explainer(model, fitur_training)
+    print("  ✓ SHAP TreeExplainer initialized")
+    
+    # ========================================
+    # PCA untuk Visualisasi
+    # ========================================
+    print("[STEP 5/6] Training PCA for visualization...")
     pca_model = PCA(n_components=2, random_state=42)
     pca_model.fit(fitur_training)
+    print("  ✓ PCA model trained (6D → 2D)")
     
-    print("[INFO] Model Isolation Forest berhasil diinisialisasi!")
-    print("[INFO] PCA Model berhasil diinisialisasi!")
-    print(f"[INFO] Jumlah sampel training: {len(fitur_training)}")
+    # ========================================
+    # NEW: Temporal Sliding Window
+    # ========================================
+    print("[STEP 6/6] Initializing Temporal Sliding Window...")
+    sliding_window = get_sliding_window()
+    print("  ✓ Sliding Window initialized (10 min buffer)")
+    
+    print("\n" + "="*60)
+    print("  ALL MODELS INITIALIZED SUCCESSFULLY!")
+    print(f"  Training samples: {len(fitur_training)}")
+    print(f"  Features: 6 (base) + 10 (temporal) = 16 total")
+    print("="*60 + "\n")
 
 
 def extract_ip_numeric(ip_address):
