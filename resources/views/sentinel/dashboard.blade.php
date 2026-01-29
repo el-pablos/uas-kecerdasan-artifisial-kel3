@@ -1231,17 +1231,58 @@
             .then(response => response.json())
             .then(data => {
                 if (data.stats) {
-                    document.getElementById('temporalReqCount').textContent = data.stats.logs_1min || 0;
-                    document.getElementById('temporalErrorRate').textContent = '0%';
-                    document.getElementById('temporalUniqueUrls').textContent = data.stats.logs_5min || 0;
-                    document.getElementById('temporalMethodEntropy').textContent = '0.00';
-                    document.getElementById('temporalAvgResponse').textContent = '0ms';
-                    document.getElementById('temporalBurstScore').textContent = '0.0';
+                    // Request per minute
+                    document.getElementById('temporalReqCount').textContent = data.stats.req_per_min || 0;
+                    
+                    // Error rate dengan %
+                    const errorRate = data.stats.error_rate || 0;
+                    document.getElementById('temporalErrorRate').textContent = errorRate + '%';
+                    
+                    // Unique URLs
+                    document.getElementById('temporalUniqueUrls').textContent = data.stats.unique_urls || 0;
+                    
+                    // Method Entropy (0-~2.0 untuk HTTP methods)
+                    const entropy = data.stats.method_entropy || 0;
+                    document.getElementById('temporalMethodEntropy').textContent = entropy.toFixed(2);
+                    
+                    // Average Response Time dengan ms suffix
+                    const avgResponse = data.stats.avg_response || 0;
+                    document.getElementById('temporalAvgResponse').textContent = avgResponse + 'ms';
+                    
+                    // Burst Score (request/detik tertinggi)
+                    const burstScore = data.stats.burst_score || 0;
+                    document.getElementById('temporalBurstScore').textContent = burstScore.toFixed(1);
+                    
+                    // Color coding berdasarkan threat level
+                    updateTemporalColors(data.stats);
                 }
             })
             .catch(err => {
                 console.log('ML Service temporal endpoint not available:', err);
             });
+        }
+        
+        // Update warna indikator berdasarkan nilai
+        function updateTemporalColors(stats) {
+            // Error rate coloring
+            const errorEl = document.getElementById('temporalErrorRate');
+            if (stats.error_rate > 20) {
+                errorEl.style.color = '#ef4444'; // Red
+            } else if (stats.error_rate > 10) {
+                errorEl.style.color = '#f59e0b'; // Orange
+            } else {
+                errorEl.style.color = '#a78bfa'; // Purple (normal)
+            }
+            
+            // Burst score coloring (potential DDoS indicator)
+            const burstEl = document.getElementById('temporalBurstScore');
+            if (stats.burst_score > 10) {
+                burstEl.style.color = '#ef4444'; // Red - possible DDoS
+            } else if (stats.burst_score > 5) {
+                burstEl.style.color = '#f59e0b'; // Orange - suspicious
+            } else {
+                burstEl.style.color = '#a78bfa'; // Purple (normal)
+            }
         }
 
         // Auto-refresh XAI data setiap 30 detik

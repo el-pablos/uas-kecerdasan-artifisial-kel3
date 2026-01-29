@@ -1151,13 +1151,83 @@ def manage_whitelist():
 def temporal_stats():
     """
     Endpoint untuk mendapatkan statistik sliding window.
+    Menyediakan data real-time untuk dashboard Temporal Behavioral Analysis.
     """
     if sliding_window is None:
         return jsonify({'status': 'error', 'error': 'Sliding window not initialized'}), 500
     
+    # Get basic stats dari sliding window
+    basic_stats = sliding_window.get_stats()
+    
+    # Hitung metrik lanjutan
+    logs_1min = sliding_window.get_logs_in_window('1min')
+    logs_5min = sliding_window.get_logs_in_window('5min')
+    
+    # Request per minute
+    req_per_min = len(logs_1min)
+    
+    # Error rate (4xx dan 5xx)
+    if logs_1min:
+        error_count = sum(1 for log in logs_1min if log.get('status_code', 200) >= 400)
+        error_rate = (error_count / len(logs_1min)) * 100
+    else:
+        error_rate = 0.0
+    
+    # Unique URLs
+    unique_urls = len(set(log.get('url', '/') for log in logs_1min))
+    
+    # Method Entropy
+    if logs_1min:
+        methods = [log.get('method', 'GET') for log in logs_1min]
+        method_counts = {}
+        for m in methods:
+            method_counts[m] = method_counts.get(m, 0) + 1
+        total = len(methods)
+        entropy = 0.0
+        for count in method_counts.values():
+            p = count / total
+            if p > 0:
+                entropy -= p * np.log2(p)
+        method_entropy = round(entropy, 2)
+    else:
+        method_entropy = 0.0
+    
+    # Average Response Time
+    if logs_1min:
+        response_times = [float(log.get('response_time', 0)) for log in logs_1min]
+        avg_response = round(np.mean(response_times), 1) if response_times else 0.0
+    else:
+        avg_response = 0.0
+    
+    # Burst Score (request per second tertinggi dalam 1 menit terakhir)
+    if logs_1min:
+        # Group by second
+        second_counts = {}
+        for log in logs_1min:
+            ts = log.get('timestamp')
+            if ts:
+                sec_key = ts.strftime('%Y-%m-%d %H:%M:%S') if hasattr(ts, 'strftime') else str(ts)[:19]
+                second_counts[sec_key] = second_counts.get(sec_key, 0) + 1
+        burst_score = max(second_counts.values()) if second_counts else 0.0
+    else:
+        burst_score = 0.0
+    
     return jsonify({
         'status': 'success',
-        'sliding_window': sliding_window.get_stats(),
+        'stats': {
+            'buffer_size': basic_stats['buffer_size'],
+            'window_minutes': basic_stats['window_size_minutes'],
+            'logs_1min': basic_stats['logs_1min'],
+            'logs_5min': basic_stats['logs_5min'],
+            'logs_10min': basic_stats['logs_10min'],
+            # Metrik untuk Dashboard
+            'req_per_min': req_per_min,
+            'error_rate': round(error_rate, 1),
+            'unique_urls': unique_urls,
+            'method_entropy': method_entropy,
+            'avg_response': avg_response,
+            'burst_score': burst_score
+        },
         'timestamp': datetime.now().isoformat()
     })
 
