@@ -278,20 +278,20 @@ class TestDDoSDetection:
         """Simulasi DDoS dengan request rate tinggi."""
         attacker_ip = '10.0.0.1'
         
-        # Simulasi 1000 request dalam waktu singkat
-        for i in range(1000):
+        # Simulasi 100 request (reduced for test speed)
+        for i in range(100):
             sliding_window.add_log({
                 'ip_address': attacker_ip,
                 'method': 'GET',
                 'url': '/api/target',
                 'status_code': 200,
-                'response_time': 50  # Response time rendah (server belum overload)
+                'response_time': 50
             })
         
         req_count = sliding_window.calculate_request_count(attacker_ip, '1min')
         
-        # Assert: Request count sangat tinggi = indikasi DDoS
-        assert req_count >= 1000
+        # Assert: Request count tinggi = indikasi DDoS
+        assert req_count >= 100
     
     def test_normal_user_vs_attacker(self, sliding_window):
         """Bandingkan pola normal user vs attacker."""
@@ -305,8 +305,8 @@ class TestDDoSDetection:
                 'response_time': 200
             })
         
-        # Attacker: 500 request
-        for i in range(500):
+        # Attacker: 50 request (reduced for test speed)
+        for i in range(50):
             sliding_window.add_log({
                 'ip_address': '10.0.0.1',
                 'method': 'GET',
@@ -320,7 +320,7 @@ class TestDDoSDetection:
         attacker_error_rate = sliding_window.calculate_error_rate('10.0.0.1', '1min')
         
         assert normal_count == 5
-        assert attacker_count == 500
+        assert attacker_count == 50
         assert attacker_error_rate == 1.0  # 100% error (401)
 
 

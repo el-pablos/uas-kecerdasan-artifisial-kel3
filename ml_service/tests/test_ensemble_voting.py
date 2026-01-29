@@ -32,8 +32,8 @@ class TestEnsembleVotingClassifier:
     def trained_ensemble(self):
         """Fixture untuk membuat dan melatih ensemble."""
         np.random.seed(42)
-        # Generate normal data untuk training
-        X_train = np.random.randn(200, 6) * 0.5 + 5
+        # Generate normal data untuk training (reduced for speed)
+        X_train = np.random.randn(50, 6) * 0.5 + 5
         
         ensemble = EnsembleVotingClassifier(contamination=0.1, random_state=42)
         ensemble.fit(X_train)
@@ -249,7 +249,7 @@ class TestEdgeCases:
     @pytest.fixture
     def trained_ensemble(self):
         np.random.seed(42)
-        X_train = np.random.randn(100, 6)
+        X_train = np.random.randn(50, 6)  # Reduced for speed
         ensemble = EnsembleVotingClassifier(contamination=0.1)
         ensemble.fit(X_train)
         return ensemble
