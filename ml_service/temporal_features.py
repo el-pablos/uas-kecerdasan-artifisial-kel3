@@ -22,7 +22,7 @@ Original Contributors / Legacy Team:
   - Farrel Alfaridzi (237006516028)
   - Chosmas Laurens Rumngewur (217006516074)
 ========================================
-"
+"""
 
 import pandas as pd
 import numpy as np
@@ -56,7 +56,7 @@ class TemporalSlidingWindow:
         """
         self.window_size = timedelta(minutes=window_size_minutes)
         self.log_buffer: deque = deque()
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()  # Reentrant lock to avoid deadlock
         
         # Konfigurasi time windows
         self.windows = {
