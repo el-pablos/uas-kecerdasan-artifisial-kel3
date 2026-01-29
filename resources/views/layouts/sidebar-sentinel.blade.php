@@ -71,6 +71,30 @@
                     </a>
                 </li>
 
+                <!-- XAI Features -->
+                <li class="menu-title mt-3"><span style="color: #4ade80;">🧠 XAI Features</span></li>
+                
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#xai-section" onclick="scrollToXAI()">
+                        <i class="ri-brain-line" style="color: #4ade80;"></i> <span>SHAP Analysis</span>
+                        <span class="badge ms-auto" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; font-size: 9px;">NEW</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#xai-section" onclick="scrollToXAI()">
+                        <i class="ri-group-line" style="color: #fbbf24;"></i> <span>Ensemble Voting</span>
+                        <span class="badge ms-auto" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 9px;">NEW</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#xai-section" onclick="scrollToXAI()">
+                        <i class="ri-timer-line" style="color: #a78bfa;"></i> <span>Temporal Analysis</span>
+                        <span class="badge ms-auto" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; font-size: 9px;">NEW</span>
+                    </a>
+                </li>
+
                 <!-- Informasi -->
                 <li class="menu-title mt-3"><span>Informasi</span></li>
 
@@ -170,6 +194,14 @@
                     statusDot.style.animation = 'none';
                     break;
             }
+        }
+    }
+
+    // Scroll to XAI section
+    function scrollToXAI() {
+        const xaiSection = document.querySelector('[style*="linear-gradient"][style*="1a1a2e"]');
+        if (xaiSection) {
+            xaiSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 </script>
