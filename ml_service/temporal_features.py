@@ -11,12 +11,18 @@ Modul ini mengubah deteksi berbasis titik (point-based) menjadi
 deteksi berbasis perilaku (behavioral context) yang sangat krusial
 untuk mendeteksi DDoS, Brute Force, dan serangan modern lainnya.
 
-Tim Pengembang:
-- JEREMY CHRISTO EMMANUELLE PANJAITAN (237006516084)
-- MUHAMMAD AKBAR HADI PRATAMA (237006516058)
-- FARREL ALFARIDZI (237006516028)
-- CHOSMAS LAURENS RUMNGEWUR (217006516074)
-"""
+========================================
+Lead Researcher & Developer (Journal-Grade Overhaul):
+  MUHAMMAD AKBAR HADI PRATAMA
+  GitHub: @el-pablos
+  Email: yeteprem.end23juni@gmail.com
+
+Original Contributors / Legacy Team:
+  - Jeremy Christo Emmanuelle Panjaitan (237006516084)
+  - Farrel Alfaridzi (237006516028)
+  - Chosmas Laurens Rumngewur (217006516074)
+========================================
+"
 
 import pandas as pd
 import numpy as np
