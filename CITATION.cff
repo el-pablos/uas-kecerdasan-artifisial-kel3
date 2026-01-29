@@ -1,0 +1,53 @@
+# This CITATION.cff file was generated for academic citation purposes.
+# For more information, see: https://citation-file-format.github.io/
+
+cff-version: 1.2.0
+title: "Log Sentinel v2.0: Hybrid Adaptive Anomaly Detection Framework with Explainable AI"
+message: "If you use this software in your research, please cite it as below."
+type: software
+authors:
+  - family-names: "Pratama"
+    given-names: "Muhammad Akbar Hadi"
+    email: "akbar.pratama@mhs.unj.ac.id"
+    affiliation: "State University of Jakarta"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "Panjaitan"
+    given-names: "Jeremy Christo Emmanuelle"
+    affiliation: "State University of Jakarta"
+  - family-names: "Alfaridzi"
+    given-names: "Farrel"
+    affiliation: "State University of Jakarta"
+  - family-names: "Rumngewur"
+    given-names: "Chosmas Laurens"
+    affiliation: "State University of Jakarta"
+repository-code: "https://github.com/el-pablos/uas-kecerdasan-artifisial-kel3"
+url: "https://github.com/el-pablos/uas-kecerdasan-artifisial-kel3"
+abstract: >-
+  Log Sentinel v2.0 is a hybrid adaptive framework for server log 
+  anomaly detection that integrates Isolation Forest, One-Class SVM, 
+  and Local Outlier Factor through an ensemble voting mechanism. 
+  The framework features SHAP-based Explainable AI for transparent 
+  model interpretation and a Temporal Sliding Window for behavioral 
+  context-aware detection.
+keywords:
+  - anomaly-detection
+  - ensemble-learning
+  - explainable-ai
+  - shap
+  - isolation-forest
+  - cybersecurity
+  - machine-learning
+  - server-log-analysis
+  - python
+  - laravel
+license: MIT
+version: "2.0.0"
+date-released: "2026-01-29"
+preferred-citation:
+  type: software
+  authors:
+    - family-names: "Pratama"
+      given-names: "Muhammad Akbar Hadi"
+  title: "Log Sentinel v2.0: Hybrid Adaptive Anomaly Detection Framework"
+  year: 2026
+  url: "https://github.com/el-pablos/uas-kecerdasan-artifisial-kel3"
