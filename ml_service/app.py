@@ -1174,14 +1174,21 @@ if __name__ == '__main__':
     port = int(os.environ.get('ML_SERVICE_PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
-    print("=" * 50)
-    print("  LOG SENTINEL - ML SERVICE")
-    print("  Anomaly Detection System")
-    print("=" * 50)
-    print(f"  🚀 Server berjalan di http://127.0.0.1:{port}")
-    print(f"  📊 Algorithm: Isolation Forest")
-    print(f"  🔧 Debug Mode: {debug}")
-    print("=" * 50)
+    print("\n")
+    print("╔══════════════════════════════════════════════════════════════╗")
+    print("║           LOG SENTINEL - ML SERVICE v2.0                     ║")
+    print("║     Hybrid Adaptive Anomaly Detection Framework              ║")
+    print("╠══════════════════════════════════════════════════════════════╣")
+    print(f"║  🚀 Server: http://127.0.0.1:{port:<27}      ║")
+    print("║  📊 Algorithms: Ensemble (IF + OCSVM + LOF)                  ║")
+    print("║  🧠 XAI: SHAP TreeExplainer                                  ║")
+    print("║  ⏱️  Feature Eng: Temporal Sliding Window                    ║")
+    print("║  🔄 Active Learning: Human-in-the-Loop Enabled               ║")
+    print(f"║  🔧 Debug Mode: {str(debug):<45} ║")
+    print("╠══════════════════════════════════════════════════════════════╣")
+    print("║  Lead Developer: Muhammad Akbar Hadi Pratama (@el-pablos)    ║")
+    print("╚══════════════════════════════════════════════════════════════╝")
+    print("\n")
     
     # Jalankan server Flask
     app.run(
