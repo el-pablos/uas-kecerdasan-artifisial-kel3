@@ -1,53 +1,80 @@
-# 🛡️ Log Sentinel - Anomaly Detection System
+# 🛡️ Log Sentinel v2.0 - Hybrid Adaptive Anomaly Detection Framework
 
 <div align="center">
 
 ![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3+-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![SHAP](https://img.shields.io/badge/SHAP-0.44+-9B59B6?style=for-the-badge&logo=python&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![Build](https://img.shields.io/badge/Build-Passing-4caf50?style=for-the-badge&logo=github-actions&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-40%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-39%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
 
-**Sistem Deteksi Anomali Log Server Berbasis Machine Learning**
+**Hybrid Adaptive Anomaly Detection Framework with Explainable AI & Real-Time Forensic Visualization**
 
-*Proyek Ujian Akhir Semester - Mata Kuliah Kecerdasan Artifisial*  
-*Universitas Negeri Jakarta*
+*Research Project - Artificial Intelligence Course*  
+*State University of Jakarta (Universitas Negeri Jakarta)*
 
-[Lihat Demo](#-screenshot-aplikasi) • [Instalasi](#-panduan-instalasi) • [API Docs](#-api-endpoints) • [Tim Kami](#-tim-pengembang)
+[Live Demo](#-screenshot-aplikasi) • [Installation](#-panduan-instalasi) • [API Docs](#-api-endpoints) • [Research Team](#-tim-pengembang)
 
 </div>
 
 ---
 
-## 📋 Tim Pengembang
+## 🔬 Research Abstract
 
-| No | Nama Lengkap | NPM | Role |
-|----|--------------|-----|------|
-| 1 | Jeremy Christo Emmanuelle Panjaitan | 237006516084 | Lead Developer |
-| 2 | Muhammad Akbar Hadi Pratama | 237006516058 | Backend Developer |
-| 3 | Farrel Alfaridzi | 237006516028 | Frontend Developer |
-| 4 | Chosmas Laurens Rumngewur | 217006516074 | ML Engineer |
+This research presents **Log Sentinel v2.0**, a hybrid adaptive framework for server log anomaly detection that addresses the limitations of single-model approaches in cybersecurity threat identification. The framework integrates three complementary unsupervised learning algorithms—**Isolation Forest**, **One-Class SVM**, and **Local Outlier Factor**—through an ensemble voting mechanism to achieve robust multi-perspective anomaly detection. 
+
+Key innovations include:
+- **SHAP-based Explainable AI (XAI)** for transparent model decision interpretation
+- **Temporal Sliding Window** for behavioral context-aware detection
+- **Real-time forensic visualization** with interactive threat mapping
+
+The system demonstrates improved detection accuracy and reduced false positive rates compared to standalone Isolation Forest implementations.
 
 ---
 
-## 📖 Deskripsi Sistem
+## 📋 Research Team
 
-**Log Sentinel** adalah sistem deteksi anomali berbasis kecerdasan buatan yang dirancang untuk menganalisis log server secara real-time dan mengidentifikasi aktivitas mencurigakan yang berpotensi menjadi ancaman keamanan siber.
+### Lead Researcher & Developer
+| Name | NPM | Role | GitHub |
+|------|-----|------|--------|
+| **Muhammad Akbar Hadi Pratama** | 237006516058 | Lead Researcher & Developer | [@el-pablos](https://github.com/el-pablos) |
 
-Sistem ini menggunakan algoritma **Isolation Forest** dari Scikit-Learn untuk mendeteksi pola anomali pada traffic server, dilengkapi dengan visualisasi **PCA (Principal Component Analysis)** untuk memberikan insight yang dapat dipahami oleh pengguna (Explainable AI).
+### Original Contributors (Legacy Team)
+| Name | NPM | Original Role |
+|------|-----|---------------|
+| Jeremy Christo Emmanuelle Panjaitan | 237006516084 | Initial Architecture |
+| Farrel Alfaridzi | 237006516028 | Frontend Foundation |
+| Chosmas Laurens Rumngewur | 217006516074 | Initial ML Implementation |
 
-### ✨ Fitur Utama
+---
 
-| Fitur | Deskripsi |
-|-------|-----------|
-| 📊 **Dashboard Real-time** | Monitoring statistik log server dengan visualisasi chart interaktif |
-| 🤖 **Deteksi Anomali ML** | Analisis otomatis menggunakan algoritma Isolation Forest |
-| 📈 **PCA Visualization** | Scatter plot 2D untuk visualisasi distribusi data normal vs anomali |
-| 🎯 **Simulasi Serangan** | Fitur demo untuk DDoS, Brute Force, SQL Injection, Path Traversal |
-| 🔍 **Filter & Search** | Pencarian dan filter log berdasarkan status dan waktu |
-| 📱 **Responsive Design** | Tampilan optimal di desktop dan mobile |
-| ✅ **40 Unit Tests** | Cakupan testing komprehensif dengan PHPUnit |
+## 📖 System Description
+
+**Log Sentinel v2.0** is an advanced AI-powered anomaly detection system designed for real-time server log analysis and cybersecurity threat identification. The framework employs a multi-model ensemble approach to achieve robust detection with explainable results.
+
+### 🔬 Technical Innovations
+
+| Innovation | Description | Scientific Contribution |
+|-----------|-------------|------------------------|
+| 🧠 **Ensemble Voting Classifier** | Combines Isolation Forest, OCSVM, and LOF through weighted majority voting | Reduces single-model bias, improves detection robustness |
+| 💡 **SHAP Explainability** | Uses TreeExplainer for feature contribution analysis | Enables transparent, interpretable security decisions |
+| ⏱️ **Temporal Sliding Window** | 10-minute behavioral context with 10 engineered features | Captures temporal patterns missed by point-in-time analysis |
+| 📊 **Real-time Forensic Visualization** | Interactive PCA scatter plot and threat mapping | Provides intuitive security situational awareness |
+
+### ✨ Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 📊 **Cybersecurity Command Center** | Dark-themed dashboard with real-time threat visualization |
+| 🤖 **Multi-Model Ensemble** | IF + OCSVM + LOF with consensus scoring |
+| 💡 **Explainable AI (XAI)** | SHAP-based feature importance visualization |
+| ⏱️ **Temporal Analysis** | Sliding window with behavioral pattern detection |
+| 🎯 **Attack Simulation** | DDoS, Brute Force, SQL Injection, Path Traversal |
+| 🔍 **Threat Level Classification** | NORMAL → SUSPICIOUS → HIGH → CRITICAL |
+| 📈 **PCA Visualization** | 2D scatter plot for anomaly distribution mapping |
+| ✅ **39 Unit Tests** | Comprehensive pytest coverage for ML components |
 
 ---
 
