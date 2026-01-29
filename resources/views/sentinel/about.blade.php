@@ -66,22 +66,35 @@
     <!-- Hero Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-primary text-white">
+            <div class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(74, 222, 128, 0.3);">
                 <div class="card-body p-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h1 class="display-6 fw-bold mb-3">
+                            <span class="badge mb-2" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">v2.0 - Research Edition</span>
+                            <h1 class="display-6 fw-bold mb-3" style="color: #4ade80;">
                                 <i class="ri-shield-check-line me-2"></i>
                                 Log Sentinel
                             </h1>
-                            <h4 class="mb-3">Anomaly Detection System</h4>
-                            <p class="lead mb-0 opacity-75">
-                                Sistem deteksi anomali berbasis Machine Learning untuk menganalisis log server
-                                dan mendeteksi aktivitas mencurigakan secara real-time menggunakan algoritma Isolation Forest.
+                            <h4 class="mb-3" style="color: #e2e8f0;">Hybrid Adaptive Anomaly Detection Framework</h4>
+                            <p class="lead mb-3" style="color: #94a3b8;">
+                                A multi-model ensemble framework integrating <strong style="color: #4ade80;">Isolation Forest</strong>, 
+                                <strong style="color: #fbbf24;">One-Class SVM</strong>, and <strong style="color: #a78bfa;">Local Outlier Factor</strong>
+                                with SHAP-based Explainable AI for transparent cybersecurity threat detection.
                             </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 8px 12px;">
+                                    <i class="ri-brain-line me-1"></i> XAI Enabled
+                                </span>
+                                <span class="badge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 8px 12px;">
+                                    <i class="ri-group-line me-1"></i> Ensemble Voting
+                                </span>
+                                <span class="badge" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 8px 12px;">
+                                    <i class="ri-timer-line me-1"></i> Temporal Analysis
+                                </span>
+                            </div>
                         </div>
                         <div class="col-md-4 text-end d-none d-md-block">
-                            <i class="ri-radar-line" style="font-size: 150px; opacity: 0.2;"></i>
+                            <i class="ri-radar-line" style="font-size: 150px; color: rgba(74, 222, 128, 0.2);"></i>
                         </div>
                     </div>
                 </div>
