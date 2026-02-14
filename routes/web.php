@@ -53,8 +53,10 @@ Route::middleware(['auth'])->group(function () {
     // ========================================
     // CTI DASHBOARD (LANDING UTAMA)
     // ========================================
-    Route::get('/cti', [CtiDashboardController::class, 'index'])
-        ->name('cti.dashboard');
+    Route::middleware(['cti.db'])->group(function () {
+        Route::get('/cti', [CtiDashboardController::class, 'index'])
+            ->name('cti.dashboard');
+    });
 
     // ========================================
     // SENTINEL (LOG ANOMALY DETECTION)
@@ -69,8 +71,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ========================================
-    // CTI PLATFORM ROUTES
+    // CTI PLATFORM ROUTES (guarded by cti.db)
     // ========================================
+    Route::middleware(['cti.db'])->group(function () {
 
     // --- THREATS ---
     Route::prefix('threats')->group(function () {
@@ -171,6 +174,8 @@ Route::middleware(['auth'])->group(function () {
 
     // --- GLOBAL SEARCH ---
     Route::get('/search', [SearchController::class, 'search'])->name('search');
+
+    }); // end cti.db middleware group
 });
 
 // ========================================
