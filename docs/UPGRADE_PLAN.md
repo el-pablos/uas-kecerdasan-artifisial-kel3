@@ -1,5 +1,9 @@
 # Log Sentinel v3.0 — OpenCTI-Inspired Upgrade Plan
 
+## Status: COMPLETED ✅
+
+All 12 steps executed successfully. 69 tests, 240 assertions passing.
+
 ## Baseline (v2.0)
 
 | Area | Status |
@@ -10,6 +14,38 @@
 | ML Service | Flask 3.0 (Ensemble + SHAP + Temporal) |
 | Models | User, ServerLog, Role |
 | Auth | Laravel UI + Sanctum + Spatie Permission |
+
+## Upgrade Results (v3.0)
+
+| Step | Description | Status | Commit |
+|------|-------------|--------|--------|
+| 1 | Baseline audit + plan | ✅ | d9d350b |
+| 2 | CTI platform shell (49 files) | ✅ | 5596827 |
+| 3 | GraphService + BFS + 11 tests | ✅ | 4db001d |
+| 4 | Cytoscape.js graph UI | ✅ | 56fa0d9 |
+| 5 | Threats module (vulnerabilities, quick-link, notes) | ✅ | c23d1a1 |
+| 6 | Observations pipeline (correlations, triage, bulk) | ✅ | 057bbb2 |
+| 7 | Cases module (timeline, graph, report export) | ✅ | c3fbf05 |
+| 8 | MITRE ATT&CK import command | ✅ | 3c90a87 |
+| 9 | ConnectorJob + CVE/OTX connectors | ✅ | c17a6c1 |
+| 10 | Global search page + API | ✅ | 0ae249e |
+| 11 | RBAC + policies + role assignment | ✅ | f201684 |
+| 12 | Final QA + docs + push | ✅ | — |
+
+## Final Metrics
+
+| Metric | Value |
+|--------|-------|
+| Tests | 69 passed (240 assertions) |
+| New files | ~70+ |
+| New lines | ~6,000+ |
+| Models | 9 new (Node, Edge, CaseModel, CaseTask, etc.) |
+| Controllers | 8 new CTI controllers |
+| Blade views | 25+ CTI views |
+| Routes | 60+ CTI routes |
+| Artisan commands | ingest:mitre-attack |
+| Connectors | CVE (NVD), OTX (AlienVault) |
+| RBAC | 3 roles, 20+ permissions |
 
 ## Mapping: Existing → OpenCTI-Inspired
 
