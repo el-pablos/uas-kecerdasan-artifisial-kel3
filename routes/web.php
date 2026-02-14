@@ -12,6 +12,7 @@ use App\Http\Controllers\IngestionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CtiDashboardController;
+use App\Http\Controllers\SetupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,9 @@ Auth::routes();
 
 // Language Translation
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
+
+// Setup page (no auth required — must work even when DB is empty)
+Route::get('/setup', [SetupController::class, 'index'])->name('setup');
 
 // ========================================
 // LOG SENTINEL ROUTES (PROTECTED BY AUTH)
@@ -218,5 +222,5 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 // Fallback untuk halaman Velzon lainnya (jika diperlukan)
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])
-    ->where('any', '^(?!api|cti|sentinel|dashboard|logs|about|threats|knowledge|observations|cases|investigations|ingestion|settings|search).*$')
+    ->where('any', '^(?!api|cti|sentinel|setup|dashboard|logs|about|threats|knowledge|observations|cases|investigations|ingestion|settings|search).*$')
     ->name('index');
