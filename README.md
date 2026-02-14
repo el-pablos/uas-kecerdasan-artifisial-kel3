@@ -1,4 +1,4 @@
-# 🛡️ Log Sentinel v2.0 - Hybrid Adaptive Anomaly Detection Framework
+# 🛡️ Log Sentinel v3.0 - CTI Platform + Hybrid Adaptive Anomaly Detection
 
 <div align="center">
 
@@ -6,17 +6,17 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3+-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
 ![SHAP](https://img.shields.io/badge/SHAP-0.44+-9B59B6?style=for-the-badge&logo=python&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.2-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![Build](https://img.shields.io/badge/Build-Passing-4caf50?style=for-the-badge&logo=github-actions&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-39%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-79%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-**Hybrid Adaptive Anomaly Detection Framework with Explainable AI & Real-Time Forensic Visualization**
+**Cyber Threat Intelligence Platform + Hybrid Anomaly Detection with Explainable AI**
 
 *Research Project - Artificial Intelligence Course*  
 *State University of Jakarta (Universitas Negeri Jakarta)*
 
-[Live Demo](#-screenshot-aplikasi) • [Installation](#-installation-guide) • [API Docs](#-api-endpoints) • [Citation](#-citation)
+[Live Demo](#-screenshot-aplikasi) • [Installation](#-panduan-instalasi) • [API Docs](#-api-endpoints) • [Citation](#-citation)
 
 </div>
 
@@ -24,15 +24,57 @@
 
 ## 📄 Abstract
 
-Server log anomaly detection is a critical component of modern cybersecurity infrastructure. Traditional single-model approaches, while computationally efficient, suffer from high false positive rates and limited interpretability. This research presents **Log Sentinel v2.0**, a hybrid adaptive framework that addresses these limitations through three key contributions:
+Server log anomaly detection is a critical component of modern cybersecurity infrastructure. Traditional single-model approaches, while computationally efficient, suffer from high false positive rates and limited interpretability. This research presents **Log Sentinel v3.0**, a hybrid adaptive framework that addresses these limitations through four key contributions:
 
-1. **Multi-Model Ensemble Architecture**: Integration of Isolation Forest (IF), One-Class Support Vector Machine (OCSVM), and Local Outlier Factor (LOF) through a weighted majority voting mechanism, reducing single-model bias and improving detection robustness.
+1. **Cyber Threat Intelligence (CTI) Platform**: A full STIX-inspired knowledge graph for managing threat actors, malware, campaigns, intrusion sets, vulnerabilities, and their relationships — inspired by OpenCTI.
 
-2. **SHAP-based Explainable AI (XAI)**: Implementation of SHapley Additive exPlanations using TreeExplainer to provide transparent, interpretable feature contribution analysis for each anomaly prediction.
+2. **Multi-Model Ensemble Architecture**: Integration of Isolation Forest (IF), One-Class Support Vector Machine (OCSVM), and Local Outlier Factor (LOF) through a weighted majority voting mechanism, reducing single-model bias and improving detection robustness.
 
-3. **Temporal Sliding Window**: A 10-minute behavioral context window with 10 engineered temporal features (request frequency, error rate slope, method entropy, etc.) to capture time-series patterns missed by point-in-time analysis.
+3. **SHAP-based Explainable AI (XAI)**: Implementation of SHapley Additive exPlanations using TreeExplainer to provide transparent, interpretable feature contribution analysis for each anomaly prediction.
 
-**Keywords**: Anomaly Detection, Ensemble Learning, Explainable AI, SHAP, Isolation Forest, Cybersecurity, Server Log Analysis
+4. **Temporal Sliding Window**: A 10-minute behavioral context window with 10 engineered temporal features (request frequency, error rate slope, method entropy, etc.) to capture time-series patterns missed by point-in-time analysis.
+
+**Keywords**: Cyber Threat Intelligence, Anomaly Detection, Ensemble Learning, Explainable AI, SHAP, Knowledge Graph, STIX, MITRE ATT&CK
+
+---
+
+## 🔀 Dual-Mode Architecture (v3.0)
+
+Log Sentinel v3.0 beroperasi dalam **dua mode** yang bisa di-switch via topbar:
+
+| Mode | URL | Deskripsi |
+|------|-----|-----------|
+| **🛡️ CTI Platform** | `/cti` (default landing) | Knowledge graph, threat actors, malware, campaigns, cases, observations, MITRE ATT&CK |
+| **📊 Log Sentinel** | `/sentinel/dashboard` | Real-time anomaly detection dashboard, log explorer, ML predictions |
+
+### URL Reference
+
+| Halaman | URL |
+|---------|-----|
+| **CTI Dashboard** | `/cti` |
+| **Knowledge Entities** | `/knowledge/entities` |
+| **Threat Actors** | `/threats/actors` |
+| **Malware** | `/threats/malware` |
+| **Campaigns** | `/threats/campaigns` |
+| **Observations** | `/observations` |
+| **Cases / Incidents** | `/cases/incidents` |
+| **Graph Explorer** | `/knowledge/graph` |
+| **MITRE ATT&CK** | `/knowledge/mitre` |
+| **Ingestion** | `/ingestion/connectors` |
+| **Settings** | `/settings/general` |
+| **Diagnostics** | `/settings/diagnostics` |
+| **Sentinel Dashboard** | `/sentinel/dashboard` |
+| **Log Explorer** | `/sentinel/logs` |
+
+### Troubleshooting
+
+Kalau setelah login masih masuk ke dashboard lama:
+
+```bash
+php artisan sentinel:doctor
+```
+
+Command ini akan clear cache dan cek semua setup.
 
 ---
 
@@ -104,12 +146,13 @@ This provides human-readable explanations like:
 
 ## 📖 System Description
 
-**Log Sentinel v2.0** is an advanced AI-powered anomaly detection system designed for real-time server log analysis and cybersecurity threat identification. The framework employs a multi-model ensemble approach to achieve robust detection with explainable results.
+**Log Sentinel v3.0** is an AI-powered cybersecurity platform combining **Cyber Threat Intelligence (CTI)** with **real-time anomaly detection**. The CTI module provides a STIX-inspired knowledge graph for threat management, while the anomaly detection engine uses a multi-model ensemble approach with explainable results.
 
 ### 🔬 Technical Innovations
 
 | Innovation | Description | Scientific Contribution |
 |-----------|-------------|------------------------|
+| 🌐 **CTI Knowledge Graph** | STIX-inspired entity/relationship model with Cytoscape.js visualization | Full threat intelligence lifecycle management |
 | 🧠 **Ensemble Voting Classifier** | Combines Isolation Forest, OCSVM, and LOF through weighted majority voting | Reduces single-model bias, improves detection robustness |
 | 💡 **SHAP Explainability** | Uses TreeExplainer for feature contribution analysis | Enables transparent, interpretable security decisions |
 | ⏱️ **Temporal Sliding Window** | 10-minute behavioral context with 10 engineered features | Captures temporal patterns missed by point-in-time analysis |
@@ -119,14 +162,18 @@ This provides human-readable explanations like:
 
 | Feature | Description |
 |---------|-------------|
-| 📊 **Cybersecurity Command Center** | Dark-themed dashboard with real-time threat visualization |
+| 🌐 **CTI Platform** | STIX-inspired knowledge graph: threat actors, malware, campaigns, vulnerabilities |
+| 📊 **Dual-Mode Dashboard** | Switch between CTI intelligence view and Log Sentinel anomaly detection |
+| 🕸️ **Graph Explorer** | Cytoscape.js interactive graph visualization of entity relationships |
+| 🛡️ **MITRE ATT&CK** | Import and map techniques from the ATT&CK framework |
+| 📋 **Case Management** | Incident cases with tasks, entity linking, and timeline tracking |
+| 🔍 **Observations** | SIEM-like enriched observations with confidence scoring |
 | 🤖 **Multi-Model Ensemble** | IF + OCSVM + LOF with consensus scoring |
 | 💡 **Explainable AI (XAI)** | SHAP-based feature importance visualization |
 | ⏱️ **Temporal Analysis** | Sliding window with behavioral pattern detection |
-| 🎯 **Attack Simulation** | DDoS, Brute Force, SQL Injection, Path Traversal |
-| 🔍 **Threat Level Classification** | NORMAL → SUSPICIOUS → HIGH → CRITICAL |
-| 📈 **PCA Visualization** | 2D scatter plot for anomaly distribution mapping |
-| ✅ **39 Unit Tests** | Comprehensive pytest coverage for ML components |
+| 🔌 **Data Connectors** | Pluggable ingestion from STIX bundles, MISP, AlienVault |
+| 🔎 **Global Search** | Unified search across all entities, threats, cases |
+| ✅ **79 Tests** | Comprehensive PHPUnit coverage for all modules |
 
 ---
 
@@ -511,6 +558,14 @@ php artisan serve
 
 Buka browser: **http://127.0.0.1:8000**
 
+Setelah login, akan langsung masuk ke **CTI Dashboard** (`/cti`).  
+Untuk anomaly detection, klik **SWITCH MODE** di topbar → pilih **Log Sentinel**.
+
+Jika masih masuk ke dashboard lama, jalankan:
+```bash
+php artisan sentinel:doctor
+```
+
 ---
 
 ## 🔐 Kredensial Demo
@@ -610,29 +665,41 @@ php artisan test --filter=SecurityTest
 ### Hasil Test
 
 ```
-Tests:    40 passed (151 assertions)
-Duration: 2.54s
+Tests:    79 passed (269 assertions)
 
 ✅ Unit Tests (10)
    - ServerLogModelTest: 9 tests
    - ExampleTest: 1 test
 
-✅ Feature Tests (30)
+✅ Feature Tests (69)
    - ApiEndpointsTest: 7 tests
    - DashboardTest: 9 tests
    - SecurityTest: 13 tests
+   - CtiEntrypointTest: 10 tests
+   - GraphServiceTest: 10 tests
+   - ThreatsModuleTest: 10 tests
+   - ObservationsModuleTest: 6 tests
+   - CasesModuleTest: 8 tests
+   - MitreAttackTest: 4 tests
    - ExampleTest: 1 test
+   - ConnectorJobTest: 1 test
 ```
 
 ### Coverage
 
 | Area | Test Count | Status |
 |------|------------|--------|
+| CTI Entrypoint & Routing | 10 | ✅ Pass |
+| Graph Service | 10 | ✅ Pass |
+| Threats Module | 10 | ✅ Pass |
+| Cases Module | 8 | ✅ Pass |
+| Observations | 6 | ✅ Pass |
 | API Endpoints | 7 | ✅ Pass |
 | Dashboard Views | 9 | ✅ Pass |
 | Security (Auth) | 13 | ✅ Pass |
+| MITRE ATT&CK | 4 | ✅ Pass |
 | Model (ServerLog) | 9 | ✅ Pass |
-| Other | 2 | ✅ Pass |
+| Other | 3 | ✅ Pass |
 
 ---
 
@@ -642,49 +709,80 @@ Duration: 2.54s
 uas-kecerdasan-artifisial-kel3/
 ├── 📂 app/
 │   ├── Http/Controllers/
-│   │   └── LogAnalysisController.php   # Main controller
-│   └── Models/
-│       └── ServerLog.php               # Eloquent model
-│
-├── 📂 database/
-│   ├── factories/
-│   │   └── ServerLogFactory.php        # Factory for testing
-│   ├── migrations/
-│   │   └── *_create_server_logs_table.php
-│   └── seeders/
-│       └── DatabaseSeeder.php          # Demo data seeder
-│
-├── 📂 ml_service/                      # Python ML Microservice
-│   ├── app.py                          # Flask + Isolation Forest
-│   ├── requirements.txt                # Python dependencies
-│   └── venv/                           # Virtual environment
+│   │   ├── CtiDashboardController.php  # CTI dashboard with KPI stats
+│   │   ├── KnowledgeController.php     # Entities CRUD + Graph explorer
+│   │   ├── ThreatsController.php       # Threat actors, malware, campaigns
+│   │   ├── ObservationsController.php  # Observations / indicators
+│   │   ├── CasesController.php         # Case/incident management
+│   │   ├── InvestigationsController.php# Investigation workspace
+│   │   ├── IngestionController.php     # STIX import, connectors
+│   │   ├── SearchController.php        # Global search
+│   │   ├── SettingsController.php      # Settings + diagnostics
+│   │   └── LogAnalysisController.php   # Sentinel anomaly detection
+│   ├── Models/
+│   │   ├── Node.php                    # Knowledge graph entity (STIX)
+│   │   ├── Edge.php                    # Entity relationship
+│   │   ├── CaseModel.php              # Incident case
+│   │   ├── CaseTask.php               # Case task
+│   │   ├── CaseItem.php               # Case-entity link
+│   │   ├── Integration.php            # Data connector
+│   │   ├── Tag.php / Taggable.php     # Tagging system
+│   │   ├── ActivityLog.php            # Audit trail
+│   │   └── ServerLog.php              # Anomaly detection log
+│   ├── Services/
+│   │   └── GraphService.php           # Cytoscape.js graph builder
+│   ├── Jobs/
+│   │   └── ConnectorJob.php           # Async data ingestion
+│   └── Console/Commands/
+│       └── SentinelDoctor.php         # sentinel:doctor CLI tool
 │
 ├── 📂 resources/views/
 │   ├── layouts/
-│   │   └── topbar.blade.php            # Navigation header
-│   ├── sentinel/
-│   │   ├── dashboard.blade.php         # Main dashboard
-│   │   ├── logs.blade.php              # Log listing
-│   │   └── about.blade.php             # About team
-│   └── auth/
-│       └── login.blade.php             # Login page
+│   │   ├── master-cti.blade.php       # CTI layout (dark theme)
+│   │   ├── master.blade.php           # Sentinel layout
+│   │   ├── sidebar-cti.blade.php      # CTI sidebar navigation
+│   │   ├── sidebar-sentinel.blade.php # Sentinel sidebar
+│   │   ├── topbar.blade.php           # Shared topbar + mode switcher
+│   │   └── mode-switcher.blade.php    # CTI/Sentinel toggle
+│   ├── cti/
+│   │   ├── dashboard/index.blade.php  # CTI dashboard (landing page)
+│   │   ├── knowledge/                 # Entities, graph, MITRE ATT&CK
+│   │   ├── threats/                   # Actors, malware, campaigns
+│   │   ├── observations/              # Observations
+│   │   ├── cases/                     # Incidents, tasks
+│   │   └── settings/                  # Settings + diagnostics
+│   └── sentinel/
+│       ├── dashboard.blade.php        # Anomaly detection dashboard
+│       └── logs.blade.php             # Log explorer
 │
-├── 📂 routes/
-│   ├── web.php                         # Web routes
-│   └── api.php                         # API routes
+├── 📂 ml_service/                     # Python ML Microservice
+│   ├── app.py                         # Flask + Ensemble models
+│   ├── ensemble_voting.py             # IF + OCSVM + LOF
+│   ├── shap_explainer.py              # SHAP TreeExplainer
+│   ├── temporal_features.py           # Sliding window features
+│   └── tests/                         # Python ML tests
 │
 ├── 📂 tests/
 │   ├── Feature/
-│   │   ├── ApiEndpointsTest.php
-│   │   ├── DashboardTest.php
-│   │   └── SecurityTest.php
+│   │   ├── CtiEntrypointTest.php      # CTI routing & layout tests
+│   │   ├── GraphServiceTest.php       # Knowledge graph tests
+│   │   ├── ThreatsModuleTest.php      # Threats CRUD tests
+│   │   ├── ObservationsModuleTest.php # Observations tests
+│   │   ├── CasesModuleTest.php        # Case management tests
+│   │   ├── MitreAttackTest.php        # MITRE ATT&CK import tests
+│   │   ├── DashboardTest.php          # Sentinel dashboard tests
+│   │   ├── SecurityTest.php           # Auth & RBAC tests
+│   │   └── ApiEndpointsTest.php       # API endpoint tests
 │   └── Unit/
 │       └── ServerLogModelTest.php
 │
-├── 📄 .env.example                     # Environment template
-├── 📄 composer.json                    # PHP dependencies
-├── 📄 package.json                     # Node dependencies
-└── 📄 README.md                        # Documentation
+├── 📂 routes/
+│   ├── web.php                        # All web routes (CTI + Sentinel)
+│   └── api.php                        # API routes
+│
+└── 📂 docs/
+    ├── ROOT_CAUSE_UI.md               # UI audit findings
+    └── UPGRADE_PLAN.md                # v2 → v3 upgrade plan
 ```
 
 ---
