@@ -68,6 +68,9 @@
                                     <a href="{{ route('knowledge.entities.show', $edge->toNode) }}" class="text-warning">
                                         <i class="{{ $edge->toNode->icon }} me-1"></i>{{ $edge->toNode->name }}
                                     </a>
+                                    @if($edge->confidence)
+                                        <span class="ms-auto text-muted small">{{ $edge->confidence }}%</span>
+                                    @endif
                                 </div>
                             @endforeach
                             @foreach($inEdges as $edge)
@@ -78,8 +81,61 @@
                                     <span class="badge bg-soft-primary text-primary mx-2">{{ $edge->type }}</span>
                                     <i class="ri-arrow-right-line text-muted mx-1"></i>
                                     <span class="text-info">{{ $node->name }}</span>
+                                    @if($edge->confidence)
+                                        <span class="ms-auto text-muted small">{{ $edge->confidence }}%</span>
+                                    @endif
                                 </div>
                             @endforeach
+                        </div>
+                    </div>
+
+                    {{-- External References --}}
+                    @php $extRefs = $node->raw['external_references'] ?? null; @endphp
+                    @if($extRefs)
+                    <div class="card">
+                        <div class="card-header"><h6 class="mb-0"><i class="ri-external-link-line me-1 text-info"></i>External References</h6></div>
+                        <div class="card-body">
+                            @foreach(explode(',', $extRefs) as $ref)
+                                @php $ref = trim($ref); @endphp
+                                <div class="d-flex align-items-center py-1">
+                                    <i class="ri-link me-2 text-muted"></i>
+                                    @if(filter_var($ref, FILTER_VALIDATE_URL))
+                                        <a href="{{ $ref }}" target="_blank" class="text-info text-break">{{ $ref }}</a>
+                                    @else
+                                        <code class="text-break">{{ $ref }}</code>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Notes / Annotations --}}
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="ri-sticky-note-line me-1 text-warning"></i>Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            @php $notes = $node->raw['notes'] ?? []; @endphp
+                            @forelse($notes as $note)
+                                <div class="border-bottom border-dark py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="small text-info">{{ $note['author'] ?? 'Unknown' }}</strong>
+                                        <span class="text-muted" style="font-size:10px">{{ isset($note['created_at']) ? \Carbon\Carbon::parse($note['created_at'])->diffForHumans() : '' }}</span>
+                                    </div>
+                                    <p class="mb-0 mt-1 text-muted small">{{ $note['text'] }}</p>
+                                </div>
+                            @empty
+                                <p class="text-muted text-center py-2 mb-0">No notes yet.</p>
+                            @endforelse
+
+                            <form method="POST" action="{{ route('threats.add-note', $node) }}" class="mt-3">
+                                @csrf
+                                <div class="input-group">
+                                    <textarea name="note" class="form-control form-control-sm" rows="2" placeholder="Add a note..." required maxlength="2000"></textarea>
+                                    <button class="btn btn-sm btn-cti-primary"><i class="ri-send-plane-line"></i></button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

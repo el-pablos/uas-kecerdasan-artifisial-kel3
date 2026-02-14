@@ -73,6 +73,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/intrusion-sets',        [ThreatsController::class, 'intrusionSetsIndex'])->name('threats.intrusion-sets.index');
         Route::get('/intrusion-sets/create', [ThreatsController::class, 'intrusionSetCreate'])->name('threats.intrusion-sets.create');
         Route::post('/intrusion-sets',       [ThreatsController::class, 'intrusionSetStore'])->name('threats.intrusion-sets.store');
+
+        Route::get('/vulnerabilities',        [ThreatsController::class, 'vulnerabilitiesIndex'])->name('threats.vulnerabilities.index');
+        Route::get('/vulnerabilities/create', [ThreatsController::class, 'vulnerabilityCreate'])->name('threats.vulnerabilities.create');
+        Route::post('/vulnerabilities',       [ThreatsController::class, 'vulnerabilityStore'])->name('threats.vulnerabilities.store');
+
+        Route::post('/quick-link',            [ThreatsController::class, 'quickLink'])->name('threats.quick-link');
+        Route::post('/nodes/{node}/notes',    [ThreatsController::class, 'addNote'])->name('threats.add-note');
     });
 
     // --- KNOWLEDGE ---
@@ -175,6 +182,10 @@ Route::prefix('api')->group(function () {
         ->name('api.graph.suggest');
     Route::get('/graph/search-nodes', [KnowledgeController::class, 'apiSearchNodes'])
         ->name('api.graph.search-nodes');
+
+    // Threat stats API
+    Route::get('/threat-stats', [ThreatsController::class, 'apiStats'])
+        ->name('api.threat-stats');
 });
 
 // ========================================

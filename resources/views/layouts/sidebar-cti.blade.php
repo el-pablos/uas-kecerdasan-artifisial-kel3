@@ -65,6 +65,9 @@
                             <li class="nav-item">
                                 <a href="{{ route('threats.intrusion-sets.index') }}" class="nav-link {{ request()->routeIs('threats.intrusion-sets.*') ? 'active' : '' }}">Intrusion Sets</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('threats.vulnerabilities.index') }}" class="nav-link {{ request()->routeIs('threats.vulnerabilities.*') ? 'active' : '' }}">Vulnerabilities</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
