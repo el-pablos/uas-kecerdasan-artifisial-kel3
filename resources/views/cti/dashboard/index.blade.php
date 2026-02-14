@@ -31,31 +31,31 @@
 <div class="row mb-4">
     <div class="col-xl-2 col-md-4 col-6 mb-3">
         <div class="cti-stat-card text-center">
-            <div class="cti-stat-number" style="color: var(--cti-red);">{{ $counts['threat-actor'] ?? 0 }}</div>
+            <div class="cti-stat-number" id="kpi-ta" style="color: var(--cti-red);">{{ $counts['threat-actor'] ?? 0 }}</div>
             <div class="cti-stat-label">Threat Actors</div>
         </div>
     </div>
     <div class="col-xl-2 col-md-4 col-6 mb-3">
         <div class="cti-stat-card text-center">
-            <div class="cti-stat-number" style="color: var(--cti-orange);">{{ $counts['malware'] ?? 0 }}</div>
+            <div class="cti-stat-number" id="kpi-mw" style="color: var(--cti-orange);">{{ $counts['malware'] ?? 0 }}</div>
             <div class="cti-stat-label">Malware</div>
         </div>
     </div>
     <div class="col-xl-2 col-md-4 col-6 mb-3">
         <div class="cti-stat-card text-center">
-            <div class="cti-stat-number" style="color: #eab308;">{{ $counts['campaign'] ?? 0 }}</div>
+            <div class="cti-stat-number" id="kpi-cp" style="color: #eab308;">{{ $counts['campaign'] ?? 0 }}</div>
             <div class="cti-stat-label">Campaigns</div>
         </div>
     </div>
     <div class="col-xl-2 col-md-4 col-6 mb-3">
         <div class="cti-stat-card text-center">
-            <div class="cti-stat-number" style="color: var(--cti-purple);">{{ $counts['intrusion-set'] ?? 0 }}</div>
+            <div class="cti-stat-number" id="kpi-is" style="color: var(--cti-purple);">{{ $counts['intrusion-set'] ?? 0 }}</div>
             <div class="cti-stat-label">Intrusion Sets</div>
         </div>
     </div>
     <div class="col-xl-2 col-md-4 col-6 mb-3">
         <div class="cti-stat-card text-center">
-            <div class="cti-stat-number" style="color: var(--cti-cyan);">{{ $counts['vulnerability'] ?? 0 }}</div>
+            <div class="cti-stat-number" id="kpi-vl" style="color: var(--cti-cyan);">{{ $counts['vulnerability'] ?? 0 }}</div>
             <div class="cti-stat-label">Vulnerabilities</div>
         </div>
     </div>
@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div>
-                    <h5 class="mb-0" style="color: var(--cti-text);">{{ $totalThreats }}</h5>
+                    <h5 class="mb-0" id="kpi-total" style="color: var(--cti-text);">{{ $totalThreats }}</h5>
                     <span class="text-muted" style="font-size: 12px;">Total Threats</span>
                 </div>
             </div>
@@ -213,6 +213,7 @@
                 <h6 class="mb-0"><i class="ri-pie-chart-line text-warning me-2"></i>Severity Distribution</h6>
             </div>
             <div class="card-body">
+                <div id="severityDonut" class="mb-3"></div>
                 @php
                     $sevColors = ['critical' => '#ef4444', 'high' => '#f59e0b', 'medium' => '#6366f1', 'low' => '#10b981', 'unknown' => '#64748b'];
                     $sevTotal = array_sum($severityDist) ?: 1;
@@ -338,16 +339,46 @@
 @endsection
 
 @section('script')
+<script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
 <script>
-    // Auto-refresh threat stats every 60s
-    setInterval(function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // === Severity Donut Chart ===
+    var sevData = @json($severityDist);
+    var sevLabels = Object.keys(sevData).map(s => s.charAt(0).toUpperCase() + s.slice(1));
+    var sevValues = Object.values(sevData);
+    var sevColors = {'critical':'#ef4444','high':'#f59e0b','medium':'#6366f1','low':'#10b981','unknown':'#64748b'};
+    var chartColors = Object.keys(sevData).map(k => sevColors[k] || '#64748b');
+
+    if (sevValues.length > 0 && document.getElementById('severityDonut')) {
+        new ApexCharts(document.getElementById('severityDonut'), {
+            chart: { type: 'donut', height: 200, background: 'transparent' },
+            series: sevValues,
+            labels: sevLabels,
+            colors: chartColors,
+            legend: { position: 'bottom', labels: { colors: '#94a3b8' }, fontSize: '11px' },
+            dataLabels: { enabled: false },
+            stroke: { width: 0 },
+            plotOptions: { pie: { donut: { size: '65%', labels: { show: true, total: { show: true, label: 'Total', color: '#94a3b8', formatter: () => sevValues.reduce((a,b)=>a+b,0) } } } } },
+            tooltip: { theme: 'dark' }
+        }).render();
+    }
+
+    // === Live refresh ===
+    function refreshStats() {
         fetch('/api/threat-stats')
             .then(r => r.json())
             .then(data => {
-                // Could update KPI cards here if needed
-                console.log('CTI stats refreshed:', data.total, 'threats');
+                var ids = {'threat-actor':'kpi-ta','malware':'kpi-mw','campaign':'kpi-cp','intrusion-set':'kpi-is','vulnerability':'kpi-vl'};
+                Object.entries(ids).forEach(([type, id]) => {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = data.counts[type] || 0;
+                });
+                var te = document.getElementById('kpi-total');
+                if (te) te.textContent = data.total || 0;
             })
             .catch(() => {});
-    }, 60000);
+    }
+    setInterval(refreshStats, 60000);
+});
 </script>
 @endsection
