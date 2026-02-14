@@ -171,6 +171,10 @@ Route::prefix('api')->group(function () {
     // Knowledge Graph API
     Route::get('/subgraph', [KnowledgeController::class, 'apiSubgraph'])
         ->name('api.subgraph');
+    Route::get('/graph/suggest-relations', [KnowledgeController::class, 'apiSuggestRelations'])
+        ->name('api.graph.suggest');
+    Route::get('/graph/search-nodes', [KnowledgeController::class, 'apiSearchNodes'])
+        ->name('api.graph.search-nodes');
 });
 
 // ========================================

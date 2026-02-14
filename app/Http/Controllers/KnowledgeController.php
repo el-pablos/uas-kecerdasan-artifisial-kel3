@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Node;
 use App\Models\Edge;
+use App\Services\GraphService;
 use Illuminate\Http\Request;
 
 class KnowledgeController extends Controller
 {
-    public function __construct()
+    protected GraphService $graph;
+
+    public function __construct(GraphService $graph)
     {
         $this->middleware('auth');
+        $this->graph = $graph;
     }
 
     // ==========================================
@@ -81,8 +85,10 @@ class KnowledgeController extends Controller
 
     public function entityShow(Node $node)
     {
-        $node->load(['outgoingEdges.toNode', 'incomingEdges.fromNode', 'tags']);
-        return view('cti.knowledge.entities.show', compact('node'));
+        $node->load(['outgoingEdges.toNode', 'incomingEdges.fromNode', 'tags', 'creator']);
+        $outEdges = $node->outgoingEdges;
+        $inEdges = $node->incomingEdges;
+        return view('cti.knowledge.entities.show', compact('node', 'outEdges', 'inEdges'));
     }
 
     public function entityEdit(Node $node)
@@ -139,7 +145,8 @@ class KnowledgeController extends Controller
         }
 
         $edges = $query->orderBy('updated_at', 'desc')->paginate(25)->withQueryString();
-        return view('cti.knowledge.relationships.index', compact('edges'));
+        $allNodes = Node::orderBy('name')->get();
+        return view('cti.knowledge.relationships.index', compact('edges', 'allNodes'));
     }
 
     public function relationshipStore(Request $request)
@@ -178,58 +185,80 @@ class KnowledgeController extends Controller
     }
 
     /**
-     * API: get subgraph for visualization.
+     * API: get subgraph for visualization (Cytoscape-friendly).
      */
     public function apiSubgraph(Request $request)
     {
-        $nodeId = $request->get('node_id');
-        $depth = min((int) $request->get('depth', 1), 3);
+        $request->validate([
+            'node_id'        => 'nullable|uuid|exists:nodes,id',
+            'depth'          => 'nullable|integer|min:0|max:4',
+            'type'           => 'nullable|string|max:50',
+            'edge_type'      => 'nullable|string|max:50',
+            'confidence_min' => 'nullable|integer|min:0|max:100',
+            'severity'       => 'nullable|string|in:critical,high,medium,low',
+            'date_from'      => 'nullable|date',
+            'date_to'        => 'nullable|date',
+            'tag'            => 'nullable|string|max:100',
+            'max_nodes'      => 'nullable|integer|min:1|max:500',
+            'max_edges'      => 'nullable|integer|min:1|max:1000',
+        ]);
 
-        if ($nodeId) {
-            $visited = collect();
-            $edgeIds = collect();
-            $this->traverseGraph($nodeId, $depth, $visited, $edgeIds);
+        $filters = $request->only([
+            'type', 'edge_type', 'confidence_min', 'severity',
+            'date_from', 'date_to', 'tag', 'max_nodes', 'max_edges',
+        ]);
 
-            $nodes = Node::whereIn('id', $visited)->get();
-            $edges = Edge::whereIn('id', $edgeIds)->with(['fromNode', 'toNode'])->get();
-        } else {
-            // Return all (limited)
-            $nodes = Node::limit(100)->get();
-            $edges = Edge::limit(200)->with(['fromNode', 'toNode'])->get();
-        }
+        $result = $this->graph->getSubgraph(
+            $request->get('node_id'),
+            (int) $request->get('depth', 1),
+            $filters
+        );
+
+        return response()->json($result);
+    }
+
+    /**
+     * API: suggest relationship types between two node types.
+     */
+    public function apiSuggestRelations(Request $request)
+    {
+        $request->validate([
+            'from_type' => 'required|string|max:50',
+            'to_type'   => 'required|string|max:50',
+        ]);
 
         return response()->json([
-            'nodes' => $nodes->map(fn(Node $n) => [
-                'id' => $n->id,
-                'label' => $n->name,
-                'type' => $n->type,
-                'severity' => $n->severity,
-                'confidence' => $n->confidence,
-            ]),
-            'edges' => $edges->map(fn(Edge $e) => [
-                'id' => $e->id,
-                'source' => $e->from_node_id,
-                'target' => $e->to_node_id,
-                'label' => $e->type,
-                'confidence' => $e->confidence,
-            ]),
+            'suggestions' => $this->graph->suggestRelations(
+                $request->from_type, $request->to_type
+            ),
         ]);
     }
 
-    private function traverseGraph(string $nodeId, int $depth, &$visited, &$edgeIds): void
+    /**
+     * API: search nodes (autocomplete).
+     */
+    public function apiSearchNodes(Request $request)
     {
-        if ($depth < 0 || $visited->contains($nodeId)) return;
-        $visited->push($nodeId);
+        $request->validate([
+            'q'     => 'required|string|min:1|max:200',
+            'types' => 'nullable|array',
+            'limit' => 'nullable|integer|min:1|max:50',
+        ]);
 
-        if ($depth === 0) return;
+        $nodes = $this->graph->searchNodes(
+            $request->q,
+            $request->get('types', []),
+            (int) $request->get('limit', 20)
+        );
 
-        $outEdges = Edge::where('from_node_id', $nodeId)->get();
-        $inEdges = Edge::where('to_node_id', $nodeId)->get();
-
-        foreach ($outEdges->merge($inEdges) as $edge) {
-            $edgeIds->push($edge->id);
-            $neighbor = $edge->from_node_id === $nodeId ? $edge->to_node_id : $edge->from_node_id;
-            $this->traverseGraph($neighbor, $depth - 1, $visited, $edgeIds);
-        }
+        return response()->json([
+            'results' => $nodes->map(fn(Node $n) => [
+                'id'    => $n->id,
+                'name'  => $n->name,
+                'type'  => $n->type,
+                'color' => $n->color,
+                'icon'  => $n->icon,
+            ]),
+        ]);
     }
 }
