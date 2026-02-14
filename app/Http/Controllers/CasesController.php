@@ -37,7 +37,7 @@ class CasesController extends Controller
 
         $stats = [
             'open' => CaseModel::where('status', 'open')->count(),
-            'in_progress' => CaseModel::where('status', 'in-progress')->count(),
+            'in-progress' => CaseModel::where('status', 'in-progress')->count(),
             'closed' => CaseModel::where('status', 'closed')->count(),
         ];
 

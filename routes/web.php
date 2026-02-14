@@ -131,11 +131,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/incidents/{case}',   [CasesController::class, 'incidentDestroy'])->name('cases.incidents.destroy');
 
         Route::get('/tasks',                 [CasesController::class, 'tasksIndex'])->name('cases.tasks.index');
-        Route::post('/tasks',                [CasesController::class, 'taskStore'])->name('cases.tasks.store');
+        Route::post('/{case}/tasks',             [CasesController::class, 'taskStore'])->name('cases.tasks.store');
         Route::put('/tasks/{task}',          [CasesController::class, 'taskUpdate'])->name('cases.tasks.update');
 
-        Route::post('/items',                [CasesController::class, 'attachItem'])->name('cases.items.attach');
-        Route::delete('/items/{item}',       [CasesController::class, 'detachItem'])->name('cases.items.detach');
+        Route::post('/{case}/items',             [CasesController::class, 'attachItem'])->name('cases.items.attach');
+        Route::delete('/{case}/items/{item}',    [CasesController::class, 'detachItem'])->name('cases.items.detach');
 
         Route::get('/incidents/{case}/report', [CasesController::class, 'exportReport'])->name('cases.incidents.report');
     });

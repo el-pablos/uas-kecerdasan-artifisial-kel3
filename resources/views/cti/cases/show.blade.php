@@ -72,9 +72,8 @@
                             @endforeach
 
                             {{-- Add task --}}
-                            <form action="{{ route('cases.tasks.store') }}" method="POST" class="mt-3">
+                            <form action="{{ route('cases.tasks.store', $case) }}" method="POST" class="mt-3">
                                 @csrf
-                                <input type="hidden" name="case_id" value="{{ $case->id }}">
                                 <div class="input-group">
                                     <input type="text" name="title" class="form-control form-control-sm" placeholder="Add task..." required>
                                     <button class="btn btn-sm btn-soft-primary"><i class="ri-add-line"></i></button>
@@ -96,7 +95,7 @@
                                     @else
                                         <span class="text-muted">Deleted entity</span>
                                     @endif
-                                    <form action="{{ route('cases.items.detach', $item) }}" method="POST" class="ms-auto" onsubmit="return confirm('Detach?')">
+                                    <form action="{{ route('cases.items.detach', [$case, $item]) }}" method="POST" class="ms-auto" onsubmit="return confirm('Detach?')">
                                         @csrf @method('DELETE')
                                         <button class="btn btn-sm btn-soft-danger"><i class="ri-close-line"></i></button>
                                     </form>
