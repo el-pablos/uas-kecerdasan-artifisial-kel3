@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('command', 255)->nullable();        // artisan command to run
             $table->string('schedule', 50)->nullable();        // cron expression
             $table->string('status', 20)->default('idle');     // idle, running, error
+            $table->string('last_message', 500)->nullable();   // last run result message
             $table->json('config')->nullable();
             $table->timestamp('last_run_at')->nullable();
             $table->timestamps();
