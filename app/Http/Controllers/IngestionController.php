@@ -111,11 +111,26 @@ class IngestionController extends Controller
         ]);
 
         try {
+            // Check if integration has a job_class (ConnectorJob-based)
+            $jobClass = $integration->config['job_class'] ?? null;
+            if ($jobClass && class_exists($jobClass)) {
+                // Dispatch synchronously for now (queue later)
+                $job = new $jobClass($integration);
+                $job->handle();
+                return back()->with('success', "Connector '{$integration->name}' executed via job.");
+            }
+
+            // Fallback: run artisan command
             if ($integration->command) {
                 Artisan::call($integration->command);
                 $integration->update([
                     'status' => 'success',
-                    'last_message' => Artisan::output(),
+                    'last_message' => \Str::limit(Artisan::output(), 500),
+                ]);
+            } else {
+                $integration->update([
+                    'status' => 'error',
+                    'last_message' => 'No command or job_class configured.',
                 ]);
             }
         } catch (\Exception $e) {

@@ -210,9 +210,36 @@ class CtiDemoSeeder extends Seeder
             ['name' => 'MITRE ATT&CK Importer'],
             [
                 'type'    => 'connector',
-                'command' => 'cti:import-mitre',
+                'command' => 'ingest:mitre-attack',
                 'status'  => 'idle',
                 'config'  => ['version' => '15.1', 'source' => 'https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json'],
+            ]
+        );
+
+        Integration::firstOrCreate(
+            ['name' => 'NVD CVE Feed'],
+            [
+                'type'     => 'connector',
+                'schedule' => '0 */6 * * *',
+                'status'   => 'idle',
+                'config'   => [
+                    'job_class' => \App\Jobs\Connectors\CveConnector::class,
+                    'limit' => 20,
+                ],
+            ]
+        );
+
+        Integration::firstOrCreate(
+            ['name' => 'AlienVault OTX'],
+            [
+                'type'     => 'connector',
+                'schedule' => '0 */12 * * *',
+                'status'   => 'idle',
+                'config'   => [
+                    'job_class' => \App\Jobs\Connectors\OtxConnector::class,
+                    'api_key' => '',
+                    'limit' => 10,
+                ],
             ]
         );
 
