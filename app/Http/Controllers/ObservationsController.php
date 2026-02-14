@@ -25,17 +25,21 @@ class ObservationsController extends Controller
             });
         }
         if ($request->filled('subtype')) {
-            $query->whereJsonContains('raw->observable_type', $request->subtype);
+            $query->where('type', $request->subtype);
+        }
+        if ($request->filled('severity')) {
+            $query->where('severity', $request->severity);
         }
 
-        $nodes = $query->orderBy('updated_at', 'desc')->paginate(25)->withQueryString();
+        $observations = $query->orderBy('updated_at', 'desc')->paginate(25)->withQueryString();
 
-        // Stats
-        $totalObservables = Node::where('type', 'observable')->count();
-        $totalSightings = Node::where('type', 'sighting')->count();
-        $totalIndicators = Node::where('type', 'indicator')->count();
+        $stats = [
+            'observable' => Node::where('type', 'observable')->count(),
+            'sighting'   => Node::where('type', 'sighting')->count(),
+            'indicator'  => Node::where('type', 'indicator')->count(),
+        ];
 
-        return view('cti.observations.index', compact('nodes', 'totalObservables', 'totalSightings', 'totalIndicators'));
+        return view('cti.observations.index', compact('observations', 'stats'));
     }
 
     public function alerts(Request $request)
@@ -122,5 +126,128 @@ class ObservationsController extends Controller
         activity_log('create', 'observable', $ipNode->id, "Promoted log #{$log->id} to observable node");
 
         return back()->with('success', "Observable created for {$log->ip_address}.");
+    }
+
+    /**
+     * Bulk promote: auto-promote top N unlinked anomalies.
+     */
+    public function bulkPromote(Request $request)
+    {
+        $limit = min($request->input('limit', 10), 50);
+
+        $logs = ServerLog::where('prediction_result', 'anomaly')
+            ->whereNotIn('ip_address', Node::where('type', 'observable')->pluck('name'))
+            ->orderByDesc('severity_score')
+            ->take($limit)
+            ->get();
+
+        $created = 0;
+        foreach ($logs as $log) {
+            $ipNode = Node::firstOrCreate(
+                ['type' => 'observable', 'name' => $log->ip_address],
+                [
+                    'description' => "IP address observed in server logs",
+                    'confidence'  => 70,
+                    'severity'    => $log->severity_score >= 80 ? 'critical' : ($log->severity_score >= 60 ? 'high' : 'medium'),
+                    'first_seen'  => $log->created_at,
+                    'last_seen'   => $log->created_at,
+                    'source_ref'  => 'log-sentinel',
+                    'raw'         => ['observable_type' => 'ipv4-addr', 'value' => $log->ip_address],
+                    'created_by'  => auth()->id(),
+                ]
+            );
+
+            $sighting = Node::firstOrCreate(
+                ['type' => 'sighting', 'name' => "Sighting: {$log->ip_address} anomaly"],
+                [
+                    'description' => "Anomalous: {$log->method} {$log->url} → {$log->status_code}",
+                    'confidence'  => intval($log->confidence_score * 100),
+                    'severity'    => $log->severity_score >= 80 ? 'critical' : ($log->severity_score >= 60 ? 'high' : 'medium'),
+                    'first_seen'  => $log->created_at,
+                    'source_ref'  => 'ml-ensemble',
+                    'raw'         => ['log_id' => $log->id],
+                    'created_by'  => auth()->id(),
+                ]
+            );
+
+            Edge::firstOrCreate(
+                ['from_node_id' => $ipNode->id, 'to_node_id' => $sighting->id, 'type' => 'sighting-of'],
+                ['confidence' => 70, 'created_by' => auth()->id()]
+            );
+            $created++;
+        }
+
+        activity_log('create', 'observable', null, "Bulk promoted {$created} anomalies");
+
+        return back()->with('success', "{$created} observables created from top anomalies.");
+    }
+
+    /**
+     * Triage: update severity/status of an observable.
+     */
+    public function triage(Request $request, Node $node)
+    {
+        $validated = $request->validate([
+            'severity'   => 'required|in:critical,high,medium,low,unknown',
+            'confidence' => 'nullable|integer|min:0|max:100',
+            'triage_note' => 'nullable|string|max:500',
+        ]);
+
+        $node->update([
+            'severity'   => $validated['severity'],
+            'confidence' => $validated['confidence'] ?? $node->confidence,
+        ]);
+
+        if (!empty($validated['triage_note'])) {
+            $raw = $node->raw ?? [];
+            $raw['notes'] = $raw['notes'] ?? [];
+            $raw['notes'][] = [
+                'text'       => "[TRIAGE] {$validated['triage_note']}",
+                'author'     => auth()->user()->name,
+                'author_id'  => auth()->id(),
+                'created_at' => now()->toISOString(),
+            ];
+            $node->update(['raw' => $raw]);
+        }
+
+        activity_log('update', 'node', $node->id, "Triaged {$node->name} → {$validated['severity']}");
+
+        return back()->with('success', "{$node->name} triaged.");
+    }
+
+    /**
+     * Correlation view: find observables that share common relations.
+     */
+    public function correlations(Request $request)
+    {
+        // Get observables with their edges
+        $observables = Node::where('type', 'observable')
+            ->withCount(['outEdges', 'inEdges'])
+            ->orderByRaw('(out_edges_count + in_edges_count) DESC')
+            ->take(50)
+            ->get();
+
+        // Find clusters: observables targeting the same entities
+        $clusters = [];
+        $targetMap = [];
+        foreach ($observables as $obs) {
+            $targets = Edge::where('from_node_id', $obs->id)
+                ->with('toNode:id,name,type')
+                ->get()
+                ->pluck('toNode')
+                ->filter();
+            foreach ($targets as $t) {
+                $targetMap[$t->id] = $targetMap[$t->id] ?? ['target' => $t, 'sources' => []];
+                $targetMap[$t->id]['sources'][] = $obs;
+            }
+        }
+        // Only keep clusters with 2+ sources
+        foreach ($targetMap as $tid => $data) {
+            if (count($data['sources']) >= 2) {
+                $clusters[] = $data;
+            }
+        }
+
+        return view('cti.observations.correlations', compact('observables', 'clusters'));
     }
 }

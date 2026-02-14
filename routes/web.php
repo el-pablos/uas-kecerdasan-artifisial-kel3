@@ -103,7 +103,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('observations')->group(function () {
         Route::get('/',       [ObservationsController::class, 'index'])->name('observations.index');
         Route::get('/alerts', [ObservationsController::class, 'alerts'])->name('observations.alerts');
+        Route::get('/correlations', [ObservationsController::class, 'correlations'])->name('observations.correlations');
         Route::post('/promote/{serverLog}', [ObservationsController::class, 'promoteToObservable'])->name('observations.promote');
+        Route::post('/bulk-promote',  [ObservationsController::class, 'bulkPromote'])->name('observations.bulk-promote');
+        Route::put('/triage/{node}',  [ObservationsController::class, 'triage'])->name('observations.triage');
     });
 
     // --- CASES ---
