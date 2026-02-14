@@ -31,7 +31,11 @@ class ThreatsController extends Controller
             $query->where('severity', $request->severity);
         }
 
-        $nodes = $query->orderBy('updated_at', 'desc')->paginate(25)->withQueryString();
+        $nodes = $query
+            ->withCount(['outgoingEdges as out_edges_count', 'incomingEdges as in_edges_count'])
+            ->orderBy('updated_at', 'desc')
+            ->paginate(25)
+            ->withQueryString();
 
         return view('cti.threats.index', [
             'nodes' => $nodes,
@@ -67,27 +71,27 @@ class ThreatsController extends Controller
 
     // ===== Threat Actors =====
     public function actorsIndex(Request $request) { return $this->indexForType('threat-actor', $request); }
-    public function actorCreate() { return view('cti.threats.create', ['type' => 'threat-actor', 'typeLabel' => 'Threat Actor']); }
+    public function actorCreate() { return view('cti.threats.create', ['type' => 'threat-actor', 'typeLabel' => 'Threat Actor', 'routeSegment' => 'actors']); }
     public function actorStore(Request $request) { return $this->storeForType('threat-actor', $request); }
 
     // ===== Malware =====
     public function malwareIndex(Request $request) { return $this->indexForType('malware', $request); }
-    public function malwareCreate() { return view('cti.threats.create', ['type' => 'malware', 'typeLabel' => 'Malware']); }
+    public function malwareCreate() { return view('cti.threats.create', ['type' => 'malware', 'typeLabel' => 'Malware', 'routeSegment' => 'malware']); }
     public function malwareStore(Request $request) { return $this->storeForType('malware', $request); }
 
     // ===== Campaigns =====
     public function campaignsIndex(Request $request) { return $this->indexForType('campaign', $request); }
-    public function campaignCreate() { return view('cti.threats.create', ['type' => 'campaign', 'typeLabel' => 'Campaign']); }
+    public function campaignCreate() { return view('cti.threats.create', ['type' => 'campaign', 'typeLabel' => 'Campaign', 'routeSegment' => 'campaigns']); }
     public function campaignStore(Request $request) { return $this->storeForType('campaign', $request); }
 
     // ===== Intrusion Sets =====
     public function intrusionSetsIndex(Request $request) { return $this->indexForType('intrusion-set', $request); }
-    public function intrusionSetCreate() { return view('cti.threats.create', ['type' => 'intrusion-set', 'typeLabel' => 'Intrusion Set']); }
+    public function intrusionSetCreate() { return view('cti.threats.create', ['type' => 'intrusion-set', 'typeLabel' => 'Intrusion Set', 'routeSegment' => 'intrusion-sets']); }
     public function intrusionSetStore(Request $request) { return $this->storeForType('intrusion-set', $request); }
 
     // ===== Vulnerabilities =====
     public function vulnerabilitiesIndex(Request $request) { return $this->indexForType('vulnerability', $request); }
-    public function vulnerabilityCreate() { return view('cti.threats.create', ['type' => 'vulnerability', 'typeLabel' => 'Vulnerability']); }
+    public function vulnerabilityCreate() { return view('cti.threats.create', ['type' => 'vulnerability', 'typeLabel' => 'Vulnerability', 'routeSegment' => 'vulnerabilities']); }
     public function vulnerabilityStore(Request $request) { return $this->storeForType('vulnerability', $request); }
 
     /**

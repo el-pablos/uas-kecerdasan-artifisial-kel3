@@ -83,7 +83,7 @@
                                                     <span class="badge-cti badge-{{ $node->severity ?? 'unknown' }}">{{ $node->severity ?? 'unknown' }}</span>
                                                 </td>
                                                 <td>
-                                                    <span class="text-muted">{{ $node->outEdges->count() + $node->inEdges->count() }}</span>
+                                                    <span class="text-muted">{{ ($node->out_edges_count ?? 0) + ($node->in_edges_count ?? 0) }}</span>
                                                 </td>
                                                 <td>{{ $node->first_seen ? $node->first_seen->format('Y-m-d') : '—' }}</td>
                                                 <td>{{ $node->created_at->diffForHumans() }}</td>
