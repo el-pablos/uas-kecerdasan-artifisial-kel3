@@ -15,7 +15,7 @@ class Edge extends Model
 
     protected $fillable = [
         'type', 'from_node_id', 'to_node_id', 'confidence',
-        'start_time', 'stop_time', 'description', 'raw', 'created_by',
+        'start_time', 'stop_time', 'description', 'stix_id', 'raw', 'created_by',
     ];
 
     protected $casts = [

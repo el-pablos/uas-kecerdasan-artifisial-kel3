@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Add stix_id column to nodes and edges for MITRE ATT&CK import deduplication.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('nodes', function (Blueprint $table) {
+            $table->string('stix_id', 255)->nullable()->after('source_ref');
+            $table->index('stix_id');
+        });
+
+        Schema::table('edges', function (Blueprint $table) {
+            $table->string('stix_id', 255)->nullable()->after('description');
+            $table->index('stix_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('nodes', function (Blueprint $table) {
+            $table->dropIndex(['stix_id']);
+            $table->dropColumn('stix_id');
+        });
+
+        Schema::table('edges', function (Blueprint $table) {
+            $table->dropIndex(['stix_id']);
+            $table->dropColumn('stix_id');
+        });
+    }
+};

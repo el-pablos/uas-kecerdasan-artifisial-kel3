@@ -17,7 +17,7 @@ class Node extends Model
 
     protected $fillable = [
         'type', 'name', 'description', 'confidence', 'severity',
-        'first_seen', 'last_seen', 'source_ref', 'raw', 'created_by',
+        'first_seen', 'last_seen', 'source_ref', 'stix_id', 'raw', 'created_by',
     ];
 
     protected $casts = [
