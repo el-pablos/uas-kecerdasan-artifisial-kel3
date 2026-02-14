@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Node;
 use App\Models\Edge;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ThreatsController extends Controller
 {
@@ -36,6 +37,7 @@ class ThreatsController extends Controller
             'nodes' => $nodes,
             'type' => $type,
             'typeLabel' => self::typeLabel($type),
+            'routeSegment' => self::routeSegment($type),
         ]);
     }
 
@@ -48,6 +50,18 @@ class ThreatsController extends Controller
             'intrusion-set' => 'Intrusion Sets',
             'vulnerability' => 'Vulnerabilities',
             default => ucfirst(str_replace('-', ' ', $type)),
+        };
+    }
+
+    public static function routeSegment(string $type): string
+    {
+        return match ($type) {
+            'threat-actor' => 'actors',
+            'malware' => 'malware',
+            'campaign' => 'campaigns',
+            'intrusion-set' => 'intrusion-sets',
+            'vulnerability' => 'vulnerabilities',
+            default => Str::plural($type),
         };
     }
 

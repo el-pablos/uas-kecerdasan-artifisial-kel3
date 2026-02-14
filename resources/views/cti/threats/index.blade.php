@@ -19,7 +19,7 @@
                             <span class="badge bg-soft-danger text-danger ms-1">{{ $nodes->total() }}</span>
                         </h4>
                         <div class="page-title-right d-flex gap-2">
-                            <a href="{{ route('threats.' . str_replace('_', '-', Str::plural($type == 'intrusion-set' ? 'intrusion-sets' : ($type == 'vulnerability' ? 'vulnerabilities' : $type))) . '.create') }}" class="btn btn-sm btn-soft-primary">
+                            <a href="{{ route('threats.' . $routeSegment . '.create') }}" class="btn btn-sm btn-soft-primary">
                                 <i class="ri-add-line"></i> Create
                             </a>
                         </div>
@@ -98,7 +98,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="7" class="text-center text-muted py-4">
-                                                    No {{ str_replace('-', ' ', $type) }}s found. <a href="{{ route('threats.' . str_replace('_', '-', Str::plural($type == 'intrusion-set' ? 'intrusion-sets' : ($type == 'vulnerability' ? 'vulnerabilities' : $type))) . '.create') }}">Create one</a>.
+                                                    No {{ str_replace('-', ' ', $type) }}s found. <a href="{{ route('threats.' . $routeSegment . '.create') }}">Create one</a>.
                                                 </td>
                                             </tr>
                                         @endforelse

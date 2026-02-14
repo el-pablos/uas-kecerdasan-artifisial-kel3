@@ -73,7 +73,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($entities as $node)
+                                        @forelse ($nodes as $node)
                                             <tr>
                                                 <td>
                                                     <a href="{{ route('knowledge.entities.show', $node) }}" class="text-info fw-medium">
@@ -120,7 +120,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mt-3">{{ $entities->links() }}</div>
+                            <div class="mt-3">{{ $nodes->links() }}</div>
                         </div>
                     </div>
                 </div>
