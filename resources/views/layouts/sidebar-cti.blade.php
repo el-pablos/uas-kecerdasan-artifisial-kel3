@@ -208,6 +208,24 @@
                     </a>
                 </li>
 
+                {{-- ===== SENTINEL MODE ===== --}}
+                <li class="menu-title"><span style="color: #6366f1; font-size: 10px; letter-spacing: 2px;">LOG SENTINEL</span></li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('sentinel.dashboard') ? 'active' : '' }}"
+                       href="{{ route('sentinel.dashboard') }}"
+                       style="{{ request()->routeIs('sentinel.*') ? '' : 'opacity: 0.7;' }}">
+                        <i class="ri-shield-check-line" style="color: #22d3ee;"></i> <span>Anomaly Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('sentinel.logs') ? 'active' : '' }}"
+                       href="{{ route('sentinel.logs') }}"
+                       style="{{ request()->routeIs('sentinel.*') ? '' : 'opacity: 0.7;' }}">
+                        <i class="ri-file-list-3-line" style="color: #22d3ee;"></i> <span>Log Explorer</span>
+                    </a>
+                </li>
+
                 {{-- ===== SERVICE STATUS ===== --}}
                 <li class="menu-title"><span style="color: #6366f1; font-size: 10px; letter-spacing: 2px;">SERVICES</span></li>
 
