@@ -98,6 +98,16 @@
                 <!-- Informasi -->
                 <li class="menu-title mt-3"><span>Informasi</span></li>
 
+                {{-- Link ke CTI Platform --}}
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('cti.dashboard') }}" 
+                       style="background: rgba(99,102,241,0.08); border-left: 2px solid #6366f1;">
+                        <i class="ri-shield-flash-line" style="color: #6366f1;"></i> 
+                        <span style="color: #818cf8;">Threat Intelligence (CTI)</span>
+                        <span class="badge ms-auto" style="background: rgba(99,102,241,0.2); color: #818cf8; font-size: 9px;">NEW</span>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('sentinel.about') ? 'active' : '' }}" 
                        href="{{ route('sentinel.about') }}">
