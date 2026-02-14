@@ -196,6 +196,11 @@
                             <li class="nav-item">
                                 <a href="{{ route('settings.audit') }}" class="nav-link {{ request()->routeIs('settings.audit') ? 'active' : '' }}">Audit Logs</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('settings.diagnostics') }}" class="nav-link {{ request()->routeIs('settings.diagnostics') ? 'active' : '' }}">
+                                    <i class="ri-stethoscope-line me-1"></i>Diagnostics
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>

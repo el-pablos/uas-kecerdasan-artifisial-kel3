@@ -162,6 +162,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/taxonomy',             [SettingsController::class, 'tagStore'])->name('settings.taxonomy.store');
         Route::delete('/taxonomy/{tag}',     [SettingsController::class, 'tagDestroy'])->name('settings.taxonomy.destroy');
         Route::get('/audit',                 [SettingsController::class, 'audit'])->name('settings.audit');
+        Route::get('/diagnostics',           [SettingsController::class, 'diagnostics'])->name('settings.diagnostics');
     });
 
     // --- GLOBAL SEARCH ---
