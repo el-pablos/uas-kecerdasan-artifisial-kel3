@@ -23,6 +23,21 @@ class SettingsController extends Controller
         return view('cti.settings.users', compact('users', 'roles'));
     }
 
+    /**
+     * Assign role to user.
+     */
+    public function assignRole(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'role' => 'required|string|exists:roles,name',
+        ]);
+
+        $user->syncRoles([$validated['role']]);
+        activity_log('update', 'user', $user->id, "Assigned role '{$validated['role']}' to {$user->name}");
+
+        return back()->with('success', "Role '{$validated['role']}' assigned to {$user->name}.");
+    }
+
     public function tokens()
     {
         $user = auth()->user();

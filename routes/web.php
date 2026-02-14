@@ -142,6 +142,7 @@ Route::middleware(['auth'])->group(function () {
     // --- SETTINGS ---
     Route::prefix('settings')->group(function () {
         Route::get('/users',                 [SettingsController::class, 'users'])->name('settings.users');
+        Route::put('/users/{user}/role',     [SettingsController::class, 'assignRole'])->name('settings.users.assign-role');
         Route::get('/tokens',                [SettingsController::class, 'tokens'])->name('settings.tokens');
         Route::post('/tokens',               [SettingsController::class, 'createToken'])->name('settings.tokens.create');
         Route::delete('/tokens/{tokenId}',   [SettingsController::class, 'revokeToken'])->name('settings.tokens.revoke');

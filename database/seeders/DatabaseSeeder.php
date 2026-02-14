@@ -112,5 +112,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
         $this->command->info('🎯 Total: 20 server logs siap untuk demo');
         $this->command->info('📊 Statistik: 8 Normal | 12 Anomaly (60% threat rate)');
+
+        // RBAC + CTI Demo Data
+        $this->call(RbacSeeder::class);
+        $this->call(CtiDemoSeeder::class);
     }
 }
