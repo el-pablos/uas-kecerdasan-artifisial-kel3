@@ -3,15 +3,23 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LogAnalysisController;
+use App\Http\Controllers\KnowledgeController;
+use App\Http\Controllers\ThreatsController;
+use App\Http\Controllers\ObservationsController;
+use App\Http\Controllers\CasesController;
+use App\Http\Controllers\InvestigationsController;
+use App\Http\Controllers\IngestionController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - Log Sentinel
+| Web Routes - Log Sentinel CTI Platform
 |--------------------------------------------------------------------------
 |
-| Definisi route untuk aplikasi Log Sentinel - Anomaly Detection System.
-| Sistem ini mengintegrasikan Laravel dengan Python ML Service
-| untuk mendeteksi aktivitas mencurigakan pada log server.
+| Definisi route untuk aplikasi Log Sentinel - Threat & Security
+| Intelligence Command Center. Mengintegrasikan Laravel dengan
+| Python ML Service + STIX-inspired Knowledge Graph.
 |
 */
 
@@ -43,6 +51,96 @@ Route::middleware(['auth'])->group(function () {
     // Halaman About
     Route::get('/about', [LogAnalysisController::class, 'about'])
         ->name('sentinel.about');
+
+    // ========================================
+    // CTI PLATFORM ROUTES
+    // ========================================
+
+    // --- THREATS ---
+    Route::prefix('threats')->group(function () {
+        Route::get('/actors',          [ThreatsController::class, 'actorsIndex'])->name('threats.actors.index');
+        Route::get('/actors/create',   [ThreatsController::class, 'actorCreate'])->name('threats.actors.create');
+        Route::post('/actors',         [ThreatsController::class, 'actorStore'])->name('threats.actors.store');
+
+        Route::get('/malware',         [ThreatsController::class, 'malwareIndex'])->name('threats.malware.index');
+        Route::get('/malware/create',  [ThreatsController::class, 'malwareCreate'])->name('threats.malware.create');
+        Route::post('/malware',        [ThreatsController::class, 'malwareStore'])->name('threats.malware.store');
+
+        Route::get('/campaigns',        [ThreatsController::class, 'campaignsIndex'])->name('threats.campaigns.index');
+        Route::get('/campaigns/create', [ThreatsController::class, 'campaignCreate'])->name('threats.campaigns.create');
+        Route::post('/campaigns',       [ThreatsController::class, 'campaignStore'])->name('threats.campaigns.store');
+
+        Route::get('/intrusion-sets',        [ThreatsController::class, 'intrusionSetsIndex'])->name('threats.intrusion-sets.index');
+        Route::get('/intrusion-sets/create', [ThreatsController::class, 'intrusionSetCreate'])->name('threats.intrusion-sets.create');
+        Route::post('/intrusion-sets',       [ThreatsController::class, 'intrusionSetStore'])->name('threats.intrusion-sets.store');
+    });
+
+    // --- KNOWLEDGE ---
+    Route::prefix('knowledge')->group(function () {
+        Route::get('/entities',             [KnowledgeController::class, 'entitiesIndex'])->name('knowledge.entities.index');
+        Route::get('/entities/create',      [KnowledgeController::class, 'entityCreate'])->name('knowledge.entities.create');
+        Route::post('/entities',            [KnowledgeController::class, 'entityStore'])->name('knowledge.entities.store');
+        Route::get('/entities/{node}',      [KnowledgeController::class, 'entityShow'])->name('knowledge.entities.show');
+        Route::get('/entities/{node}/edit', [KnowledgeController::class, 'entityEdit'])->name('knowledge.entities.edit');
+        Route::put('/entities/{node}',      [KnowledgeController::class, 'entityUpdate'])->name('knowledge.entities.update');
+        Route::delete('/entities/{node}',   [KnowledgeController::class, 'entityDestroy'])->name('knowledge.entities.destroy');
+
+        Route::get('/relationships',        [KnowledgeController::class, 'relationshipsIndex'])->name('knowledge.relationships.index');
+        Route::post('/relationships',       [KnowledgeController::class, 'relationshipStore'])->name('knowledge.relationships.store');
+        Route::delete('/relationships/{edge}', [KnowledgeController::class, 'relationshipDestroy'])->name('knowledge.relationships.destroy');
+
+        Route::get('/graph',                [KnowledgeController::class, 'graphExplorer'])->name('knowledge.graph');
+    });
+
+    // --- OBSERVATIONS ---
+    Route::prefix('observations')->group(function () {
+        Route::get('/',       [ObservationsController::class, 'index'])->name('observations.index');
+        Route::get('/alerts', [ObservationsController::class, 'alerts'])->name('observations.alerts');
+        Route::post('/promote/{serverLog}', [ObservationsController::class, 'promoteToObservable'])->name('observations.promote');
+    });
+
+    // --- CASES ---
+    Route::prefix('cases')->group(function () {
+        Route::get('/incidents',             [CasesController::class, 'incidentsIndex'])->name('cases.incidents.index');
+        Route::get('/incidents/create',      [CasesController::class, 'incidentCreate'])->name('cases.incidents.create');
+        Route::post('/incidents',            [CasesController::class, 'incidentStore'])->name('cases.incidents.store');
+        Route::get('/incidents/{case}',      [CasesController::class, 'incidentShow'])->name('cases.incidents.show');
+        Route::put('/incidents/{case}',      [CasesController::class, 'incidentUpdate'])->name('cases.incidents.update');
+        Route::delete('/incidents/{case}',   [CasesController::class, 'incidentDestroy'])->name('cases.incidents.destroy');
+
+        Route::get('/tasks',                 [CasesController::class, 'tasksIndex'])->name('cases.tasks.index');
+        Route::post('/tasks',                [CasesController::class, 'taskStore'])->name('cases.tasks.store');
+        Route::put('/tasks/{task}',          [CasesController::class, 'taskUpdate'])->name('cases.tasks.update');
+
+        Route::post('/items',                [CasesController::class, 'attachItem'])->name('cases.items.attach');
+        Route::delete('/items/{item}',       [CasesController::class, 'detachItem'])->name('cases.items.detach');
+    });
+
+    // --- INVESTIGATIONS ---
+    Route::get('/investigations', [InvestigationsController::class, 'index'])->name('investigations.index');
+
+    // --- INGESTION ---
+    Route::prefix('ingestion')->group(function () {
+        Route::get('/connectors',            [IngestionController::class, 'connectors'])->name('ingestion.connectors');
+        Route::get('/import',                [IngestionController::class, 'import'])->name('ingestion.import');
+        Route::post('/import/stix',          [IngestionController::class, 'importStixBundle'])->name('ingestion.import.stix');
+        Route::post('/connectors/{integration}/run', [IngestionController::class, 'runConnector'])->name('ingestion.connectors.run');
+    });
+
+    // --- SETTINGS ---
+    Route::prefix('settings')->group(function () {
+        Route::get('/users',                 [SettingsController::class, 'users'])->name('settings.users');
+        Route::get('/tokens',                [SettingsController::class, 'tokens'])->name('settings.tokens');
+        Route::post('/tokens',               [SettingsController::class, 'createToken'])->name('settings.tokens.create');
+        Route::delete('/tokens/{tokenId}',   [SettingsController::class, 'revokeToken'])->name('settings.tokens.revoke');
+        Route::get('/taxonomy',              [SettingsController::class, 'taxonomy'])->name('settings.taxonomy');
+        Route::post('/taxonomy',             [SettingsController::class, 'tagStore'])->name('settings.taxonomy.store');
+        Route::delete('/taxonomy/{tag}',     [SettingsController::class, 'tagDestroy'])->name('settings.taxonomy.destroy');
+        Route::get('/audit',                 [SettingsController::class, 'audit'])->name('settings.audit');
+    });
+
+    // --- GLOBAL SEARCH ---
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
 });
 
 // ========================================
@@ -69,6 +167,10 @@ Route::prefix('api')->group(function () {
     // Endpoint untuk statistik dashboard
     Route::get('/stats', [LogAnalysisController::class, 'getStats'])
         ->name('api.stats');
+
+    // Knowledge Graph API
+    Route::get('/subgraph', [KnowledgeController::class, 'apiSubgraph'])
+        ->name('api.subgraph');
 });
 
 // ========================================
@@ -82,5 +184,5 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 // Fallback untuk halaman Velzon lainnya (jika diperlukan)
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])
-    ->where('any', '^(?!api|dashboard|logs|about).*$')
+    ->where('any', '^(?!api|dashboard|logs|about|threats|knowledge|observations|cases|investigations|ingestion|settings|search).*$')
     ->name('index');
