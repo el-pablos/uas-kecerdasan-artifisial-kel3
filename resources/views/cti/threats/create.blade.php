@@ -28,7 +28,7 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('threats.' . str_replace('_', '-', Str::plural($type == 'intrusion-set' ? 'intrusion-sets' : $type)) . '.store') }}" method="POST">
+                            <form action="{{ route('threats.' . $routeSegment . '.store') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label">Name <span class="text-danger">*</span></label>
