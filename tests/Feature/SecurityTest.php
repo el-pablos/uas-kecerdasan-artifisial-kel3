@@ -37,7 +37,7 @@ class SecurityTest extends TestCase
      */
     public function test_guest_accessing_dashboard_redirects_to_login(): void
     {
-        $response = $this->get('/dashboard');
+        $response = $this->get('/sentinel/dashboard');
 
         // WAJIB redirect (302), bukan error 500
         $response->assertStatus(302);
@@ -51,7 +51,7 @@ class SecurityTest extends TestCase
      */
     public function test_guest_accessing_logs_redirects_to_login(): void
     {
-        $response = $this->get('/logs');
+        $response = $this->get('/sentinel/logs');
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
@@ -64,7 +64,7 @@ class SecurityTest extends TestCase
      */
     public function test_guest_accessing_about_redirects_to_login(): void
     {
-        $response = $this->get('/about');
+        $response = $this->get('/sentinel/about');
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
@@ -79,10 +79,10 @@ class SecurityTest extends TestCase
     {
         $response = $this->get('/');
 
-        // Root akan redirect ke dashboard
+        // Root akan redirect ke /cti
         $response->assertStatus(302);
         
-        // Follow redirect - akan ke login karena dashboard protected
+        // Follow redirect - akan ke login karena cti protected
         $response = $this->followingRedirects()->get('/');
         $response->assertStatus(200);
         // Harus di halaman login
@@ -105,9 +105,8 @@ class SecurityTest extends TestCase
             'avatar' => null,
         ]);
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($user)->get('/sentinel/dashboard');
 
-        // Harus status 200, bukan 500
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.dashboard');
     }
@@ -119,14 +118,12 @@ class SecurityTest extends TestCase
      */
     public function test_user_with_empty_avatar_can_access_dashboard(): void
     {
-        // Buat user dengan avatar empty string
         $user = User::factory()->create([
             'avatar' => '',
         ]);
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($user)->get('/sentinel/dashboard');
 
-        // Harus status 200, bukan 500
         $response->assertStatus(200);
     }
 
@@ -137,12 +134,11 @@ class SecurityTest extends TestCase
      */
     public function test_user_with_valid_avatar_can_access_dashboard(): void
     {
-        // Buat user dengan avatar valid
         $user = User::factory()->create([
             'avatar' => 'avatar-1.jpg',
         ]);
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.dashboard');
@@ -164,7 +160,7 @@ class SecurityTest extends TestCase
         // Tidak ada ServerLog sama sekali
         $this->assertEquals(0, ServerLog::count());
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         // View harus meng-handle empty state dengan baik
@@ -181,7 +177,7 @@ class SecurityTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/logs');
+        $response = $this->actingAs($user)->get('/sentinel/logs');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.logs');
@@ -196,7 +192,7 @@ class SecurityTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/about');
+        $response = $this->actingAs($user)->get('/sentinel/about');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.about');
@@ -241,14 +237,14 @@ class SecurityTest extends TestCase
         $this->actingAs($user);
         
         // Akses dashboard - harus sukses
-        $response = $this->get('/dashboard');
+        $response = $this->get('/sentinel/dashboard');
         $response->assertStatus(200);
 
         // Logout
         $this->post('/logout');
 
         // Akses dashboard lagi sebagai guest - harus redirect
-        $response = $this->get('/dashboard');
+        $response = $this->get('/sentinel/dashboard');
         $response->assertStatus(302);
         $response->assertRedirect('/login');
     }
@@ -273,9 +269,9 @@ class SecurityTest extends TestCase
         // User 3: Avatar empty
         $user3 = User::factory()->create(['avatar' => '']);
 
-        // Semua harus bisa akses dashboard tanpa crash
-        $this->actingAs($user1)->get('/dashboard')->assertStatus(200);
-        $this->actingAs($user2)->get('/dashboard')->assertStatus(200);
-        $this->actingAs($user3)->get('/dashboard')->assertStatus(200);
+        // Semua harus bisa akses sentinel dashboard tanpa crash
+        $this->actingAs($user1)->get('/sentinel/dashboard')->assertStatus(200);
+        $this->actingAs($user2)->get('/sentinel/dashboard')->assertStatus(200);
+        $this->actingAs($user3)->get('/sentinel/dashboard')->assertStatus(200);
     }
 }

@@ -2,7 +2,7 @@
 <div class="app-menu navbar-menu" style="background: #0a0e1a;">
     <!-- LOGO -->
     <div class="navbar-brand-box" style="background: #0a0e1a; border-bottom: 1px solid rgba(99, 102, 241, 0.15);">
-        <a href="{{ route('sentinel.dashboard') }}" class="logo logo-dark">
+        <a href="{{ route('cti.dashboard') }}" class="logo logo-dark">
             <span class="logo-sm"><i class="ri-shield-flash-line text-info fs-3"></i></span>
             <span class="logo-lg">
                 <div class="d-flex align-items-center">
@@ -12,7 +12,7 @@
                 <small class="text-muted d-block ms-4 ps-2" style="font-size: 9px; letter-spacing: 2px;">THREAT INTELLIGENCE</small>
             </span>
         </a>
-        <a href="{{ route('sentinel.dashboard') }}" class="logo logo-light">
+        <a href="{{ route('cti.dashboard') }}" class="logo logo-light">
             <span class="logo-sm"><i class="ri-shield-flash-line text-info fs-3"></i></span>
             <span class="logo-lg">
                 <div class="d-flex align-items-center">
@@ -34,8 +34,8 @@
 
                 {{-- ===== HOME / DASHBOARD ===== --}}
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ request()->routeIs('sentinel.dashboard') ? 'active' : '' }}"
-                       href="{{ route('sentinel.dashboard') }}">
+                    <a class="nav-link menu-link {{ request()->routeIs('cti.dashboard') ? 'active' : '' }}"
+                       href="{{ route('cti.dashboard') }}">
                         <i class="ri-dashboard-2-line"></i> <span>Dashboard</span>
                     </a>
                 </li>

@@ -21,6 +21,6 @@ class ExampleTest extends TestCase
         
         $response = $this->actingAs($user)->get('/');
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/cti');
     }
 }

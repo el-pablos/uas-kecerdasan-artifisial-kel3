@@ -11,6 +11,7 @@ use App\Http\Controllers\InvestigationsController;
 use App\Http\Controllers\IngestionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\CtiDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,24 +34,35 @@ Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang'
 // LOG SENTINEL ROUTES (PROTECTED BY AUTH)
 // ========================================
 
-// Redirect root ke dashboard sentinel
+// Redirect root ke CTI dashboard (halaman utama)
 Route::get('/', function () {
-    return redirect()->route('sentinel.dashboard');
+    return redirect()->route('cti.dashboard');
+});
+
+// Legacy redirect: /dashboard juga ke CTI
+Route::get('/dashboard', function () {
+    return redirect()->route('cti.dashboard');
 });
 
 // Semua route Log Sentinel WAJIB login
 Route::middleware(['auth'])->group(function () {
-    // Dashboard Utama
-    Route::get('/dashboard', [LogAnalysisController::class, 'dashboard'])
-        ->name('sentinel.dashboard');
+    // ========================================
+    // CTI DASHBOARD (LANDING UTAMA)
+    // ========================================
+    Route::get('/cti', [CtiDashboardController::class, 'index'])
+        ->name('cti.dashboard');
 
-    // Halaman Daftar Log
-    Route::get('/logs', [LogAnalysisController::class, 'logList'])
-        ->name('sentinel.logs');
-
-    // Halaman About
-    Route::get('/about', [LogAnalysisController::class, 'about'])
-        ->name('sentinel.about');
+    // ========================================
+    // SENTINEL (LOG ANOMALY DETECTION)
+    // ========================================
+    Route::prefix('sentinel')->group(function () {
+        Route::get('/dashboard', [LogAnalysisController::class, 'dashboard'])
+            ->name('sentinel.dashboard');
+        Route::get('/logs', [LogAnalysisController::class, 'logList'])
+            ->name('sentinel.logs');
+        Route::get('/about', [LogAnalysisController::class, 'about'])
+            ->name('sentinel.about');
+    });
 
     // ========================================
     // CTI PLATFORM ROUTES
@@ -205,5 +217,5 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 // Fallback untuk halaman Velzon lainnya (jika diperlukan)
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])
-    ->where('any', '^(?!api|dashboard|logs|about|threats|knowledge|observations|cases|investigations|ingestion|settings|search).*$')
+    ->where('any', '^(?!api|cti|sentinel|dashboard|logs|about|threats|knowledge|observations|cases|investigations|ingestion|settings|search).*$')
     ->name('index');

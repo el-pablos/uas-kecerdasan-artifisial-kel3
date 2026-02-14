@@ -46,7 +46,7 @@ class DashboardTest extends TestCase
      */
     public function test_dashboard_page_returns_status_200(): void
     {
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.dashboard');
@@ -59,7 +59,7 @@ class DashboardTest extends TestCase
      */
     public function test_dashboard_contains_required_components(): void
     {
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertSee('Log Sentinel');
@@ -76,7 +76,7 @@ class DashboardTest extends TestCase
      */
     public function test_logs_page_returns_status_200(): void
     {
-        $response = $this->actingAs($this->user)->get('/logs');
+        $response = $this->actingAs($this->user)->get('/sentinel/logs');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.logs');
@@ -89,7 +89,7 @@ class DashboardTest extends TestCase
      */
     public function test_about_page_returns_status_200(): void
     {
-        $response = $this->actingAs($this->user)->get('/about');
+        $response = $this->actingAs($this->user)->get('/sentinel/about');
 
         $response->assertStatus(200);
         $response->assertViewIs('sentinel.about');
@@ -102,7 +102,7 @@ class DashboardTest extends TestCase
      */
     public function test_about_page_displays_team_members(): void
     {
-        $response = $this->actingAs($this->user)->get('/about');
+        $response = $this->actingAs($this->user)->get('/sentinel/about');
 
         $response->assertStatus(200);
         $response->assertSee('Jeremy Christo Emmanuelle Panjaitan');
@@ -124,7 +124,7 @@ class DashboardTest extends TestCase
     {
         $response = $this->actingAs($this->user)->get('/');
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/cti');
     }
 
     /**
@@ -138,7 +138,7 @@ class DashboardTest extends TestCase
         ServerLog::factory()->count(5)->create(['prediction_result' => 'normal']);
         ServerLog::factory()->count(3)->create(['prediction_result' => 'anomaly']);
 
-        $response = $this->actingAs($this->user)->get('/logs?filter=normal');
+        $response = $this->actingAs($this->user)->get('/sentinel/logs?filter=normal');
 
         $response->assertStatus(200);
     }
@@ -154,7 +154,7 @@ class DashboardTest extends TestCase
         ServerLog::factory()->count(5)->create(['prediction_result' => 'normal']);
         ServerLog::factory()->count(3)->create(['prediction_result' => 'anomaly']);
 
-        $response = $this->actingAs($this->user)->get('/logs?filter=anomaly');
+        $response = $this->actingAs($this->user)->get('/sentinel/logs?filter=anomaly');
 
         $response->assertStatus(200);
     }
@@ -170,7 +170,7 @@ class DashboardTest extends TestCase
         ServerLog::factory()->count(7)->create(['prediction_result' => 'normal']);
         ServerLog::factory()->count(3)->create(['prediction_result' => 'anomaly']);
 
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         // Total logs harus 10
@@ -186,7 +186,7 @@ class DashboardTest extends TestCase
      */
     public function test_dashboard_displays_system_status_badge(): void
     {
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertSee('SYSTEM MONITORING: ACTIVE');
@@ -199,7 +199,7 @@ class DashboardTest extends TestCase
      */
     public function test_dashboard_displays_cyber_threat_map(): void
     {
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertSee('cyber-map');
@@ -214,7 +214,7 @@ class DashboardTest extends TestCase
      */
     public function test_dashboard_loads_leaflet_library(): void
     {
-        $response = $this->actingAs($this->user)->get('/dashboard');
+        $response = $this->actingAs($this->user)->get('/sentinel/dashboard');
 
         $response->assertStatus(200);
         $response->assertSee('leaflet');
