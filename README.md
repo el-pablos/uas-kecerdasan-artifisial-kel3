@@ -8,7 +8,7 @@
 ![SHAP](https://img.shields.io/badge/SHAP-0.44+-9B59B6?style=for-the-badge&logo=python&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.2-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![Build](https://img.shields.io/badge/Build-Passing-4caf50?style=for-the-badge&logo=github-actions&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-79%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-93%20Passed-4caf50?style=for-the-badge&logo=pytest&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 **Cyber Threat Intelligence Platform + Hybrid Anomaly Detection with Explainable AI**
@@ -75,6 +75,39 @@ php artisan sentinel:doctor
 ```
 
 Command ini akan clear cache dan cek semua setup.
+
+### ⚠️ Setup Guard (Anti 500 Error)
+
+Kalau database belum di-migrate (tabel CTI belum ada), web **tidak akan 500**.
+Semua route CTI otomatis redirect ke halaman **Setup Required** (`/setup`) yang menampilkan:
+
+- Status koneksi database (driver, nama DB, connected/not)
+- Checklist tabel CTI (9 tabel: `nodes`, `edges`, `cases`, `case_tasks`, `case_items`, `tags`, `taggables`, `activity_logs`, `integrations`)
+- Langkah fix yang bisa di-copy-paste
+
+**Quick fix untuk development:**
+
+```bash
+# Opsi 1: Sekali jalan
+php artisan app:setup
+
+# Opsi 2: Auto-fix via doctor
+php artisan sentinel:doctor --fix
+
+# Opsi 3: Manual
+php artisan optimize:clear
+php artisan migrate --seed
+```
+
+**Reset total (destructive, hanya untuk local dev):**
+
+```bash
+php artisan sentinel:doctor --fresh
+# atau
+php artisan migrate:fresh --seed
+```
+
+> **Note:** Route Sentinel (`/sentinel/*`) tidak terpengaruh guard ini — tetap bisa diakses walau tabel CTI belum ada.
 
 ---
 
@@ -173,7 +206,7 @@ This provides human-readable explanations like:
 | ⏱️ **Temporal Analysis** | Sliding window with behavioral pattern detection |
 | 🔌 **Data Connectors** | Pluggable ingestion from STIX bundles, MISP, AlienVault |
 | 🔎 **Global Search** | Unified search across all entities, threats, cases |
-| ✅ **79 Tests** | Comprehensive PHPUnit coverage for all modules |
+| ✅ **93 Tests** | Comprehensive PHPUnit coverage for all modules |
 
 ---
 
@@ -518,12 +551,18 @@ CREATE DATABASE log_sentinel_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 ### Step 5: Migrasi & Seeding
 
 ```bash
+# Cara cepat (sekali jalan: clear cache + migrate + seed + storage link)
+php artisan app:setup
+
+# Atau manual:
 php artisan migrate --seed
 ```
 
 Seeder akan membuat:
 - 1 user admin untuk demo
 - 20 dummy server logs (campuran normal dan anomaly)
+
+> **Kalau lupa step ini**, jangan khawatir — web tidak akan 500. Semua route CTI otomatis redirect ke `/setup` yang menampilkan checklist & instruksi fix.
 
 ### Step 6: Jalankan Aplikasi
 
@@ -561,9 +600,9 @@ Buka browser: **http://127.0.0.1:8000**
 Setelah login, akan langsung masuk ke **CTI Dashboard** (`/cti`).  
 Untuk anomaly detection, klik **SWITCH MODE** di topbar → pilih **Log Sentinel**.
 
-Jika masih masuk ke dashboard lama, jalankan:
+Jika masih masuk ke dashboard lama, atau ada error:
 ```bash
-php artisan sentinel:doctor
+php artisan sentinel:doctor --fix
 ```
 
 ---
