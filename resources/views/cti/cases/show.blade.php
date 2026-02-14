@@ -12,6 +12,9 @@
                             <span class="badge ms-1 bg-{{ $case->status === 'open' ? 'warning' : ($case->status === 'in-progress' ? 'info' : 'success') }}">{{ $case->status }}</span>
                         </h4>
                         <div class="d-flex gap-2">
+                            <a href="{{ route('cases.incidents.report', $case) }}" class="btn btn-sm btn-soft-info" title="Export Report">
+                                <i class="ri-file-download-line me-1"></i> Report
+                            </a>
                             <form action="{{ route('cases.incidents.update', $case) }}" method="POST" class="d-inline">
                                 @csrf @method('PUT')
                                 <input type="hidden" name="title" value="{{ $case->title }}">
@@ -103,6 +106,40 @@
                             @endforelse
                         </div>
                     </div>
+
+                    {{-- Timeline --}}
+                    @if(isset($timeline) && $timeline->count())
+                    <div class="card">
+                        <div class="card-header"><h6 class="mb-0"><i class="ri-time-line me-1"></i> Activity Timeline</h6></div>
+                        <div class="card-body">
+                            <div class="timeline-2" style="position:relative; padding-left:24px; border-left:2px solid rgba(255,255,255,.08);">
+                                @foreach($timeline as $log)
+                                    <div class="mb-3" style="position:relative">
+                                        <span style="position:absolute;left:-30px;top:4px;width:12px;height:12px;border-radius:50%;background:{{ $log->action === 'created' ? '#0ab39c' : ($log->action === 'updated' ? '#405189' : '#f06548') }};"></span>
+                                        <div>
+                                            <span class="badge bg-soft-info text-info mb-1">{{ $log->action }}</span>
+                                            <small class="text-muted ms-2">{{ $log->created_at->diffForHumans() }}</small>
+                                        </div>
+                                        <p class="text-muted mb-0 small">
+                                            {{ $log->description ?? class_basename($log->entity_type) . ' ' . $log->action }}
+                                            @if($log->user) — <strong>{{ $log->user->name }}</strong> @endif
+                                        </p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Scoped Case Graph --}}
+                    @if(isset($caseGraph) && count($caseGraph['nodes']))
+                    <div class="card">
+                        <div class="card-header"><h6 class="mb-0"><i class="ri-mind-map me-1"></i> Case Graph</h6></div>
+                        <div class="card-body p-0">
+                            <div id="case-graph" style="height:350px;width:100%;"></div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
                 {{-- Sidebar --}}
@@ -119,8 +156,110 @@
                             </ul>
                         </div>
                     </div>
+
+                    {{-- Quick Stats --}}
+                    <div class="card">
+                        <div class="card-header"><h6 class="mb-0">Quick Stats</h6></div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tasks</span>
+                                <span class="fw-medium">{{ $case->tasks->count() }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Linked Entities</span>
+                                <span class="fw-medium">{{ $case->items->count() }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Completed Tasks</span>
+                                <span class="fw-medium text-success">{{ $case->tasks->where('status','done')->count() }}</span>
+                            </div>
+                            @if(isset($timeline))
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Activity Entries</span>
+                                <span class="fw-medium">{{ $timeline->count() }}</span>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@if(isset($caseGraph) && count($caseGraph['nodes']))
+@section('script')
+    <script src="https://unpkg.com/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const graphData = @json($caseGraph);
+            const elements = [];
+
+            graphData.nodes.forEach(n => {
+                elements.push({
+                    group: 'nodes',
+                    data: {
+                        id: n.data.id,
+                        label: n.data.label,
+                        type: n.data.type,
+                        color: n.data.color || '#405189',
+                        isCase: n.data.isCase
+                    }
+                });
+            });
+
+            graphData.edges.forEach(e => {
+                elements.push({
+                    group: 'edges',
+                    data: { id: e.data.id, source: e.data.source, target: e.data.target, type: e.data.type }
+                });
+            });
+
+            const cy = cytoscape({
+                container: document.getElementById('case-graph'),
+                elements: elements,
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'background-color': 'data(color)',
+                            'color': '#fff',
+                            'text-valign': 'bottom',
+                            'text-margin-y': 5,
+                            'font-size': 10,
+                            'width': 30,
+                            'height': 30,
+                            'border-width': 0
+                        }
+                    },
+                    {
+                        selector: 'node[?isCase]',
+                        style: {
+                            'border-width': 3,
+                            'border-color': '#f0b400',
+                            'width': 38,
+                            'height': 38
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'line-color': 'rgba(255,255,255,.2)',
+                            'target-arrow-color': 'rgba(255,255,255,.3)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'label': 'data(type)',
+                            'font-size': 8,
+                            'color': 'rgba(255,255,255,.4)',
+                            'text-rotation': 'autorotate'
+                        }
+                    }
+                ],
+                layout: { name: 'cose', animate: true, nodeDimensionsIncludeLabels: true, padding: 20 }
+            });
+        });
+    </script>
+@endsection
+@endif

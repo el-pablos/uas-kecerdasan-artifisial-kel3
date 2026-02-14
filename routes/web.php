@@ -124,6 +124,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/items',                [CasesController::class, 'attachItem'])->name('cases.items.attach');
         Route::delete('/items/{item}',       [CasesController::class, 'detachItem'])->name('cases.items.detach');
+
+        Route::get('/incidents/{case}/report', [CasesController::class, 'exportReport'])->name('cases.incidents.report');
     });
 
     // --- INVESTIGATIONS ---
